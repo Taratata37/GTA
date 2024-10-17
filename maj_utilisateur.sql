@@ -1,0 +1,53 @@
+UPDATE Personne 
+set NomPersonne = REPLACE(UPPER(:nom),'6','-'),
+PrenomPersonne = :prenom,
+TelephonePersonne = :telephone,
+CourrielPersonne = :courriel,
+NomJfPersonne = UPPER(:nomjf)
+WHERE IdPersonne = $IdPersonne 
+AND :nom IS NOT NULL
+AND (LENGTH(:nomjf) > 0 OR Personne.SexePersonne = 'M') 
+AND (:nomjf IS NULL OR Personne.SexePersonne = 'F')
+AND (LENGTH(:nom) > 0 OR Personne.SexePersonne = 'F') 
+RETURNING 'redirect' AS component, 'index.sql' AS link;
+
+SELECT 
+'alert' as component,
+'Erreur de saisie' as title,
+'Données incohérente : Nom de jeune fille impossible' as description,
+'alert-circle' as icon,
+'red' as color
+FROM Personne
+WHERE (LENGTH(:nomjf) > 0 AND Personne.SexePersonne ='M')
+AND Personne.IdPersonne = $IdPersonne ;
+
+SELECT 
+'alert' as component,
+'Erreur de saisie' as title,
+'Données incohérente : Nom de jeune fille obligatoire' as description,
+'alert-circle' as icon,
+'red' as color
+FROM Personne
+WHERE (LENGTH(:nomjf) < 1 AND Personne.SexePersonne ='F')
+AND Personne.IdPersonne = $IdPersonne ;
+
+SELECT 
+'alert' as component,
+'Erreur de saisie' as title,
+'Nom obligatoire' as description,
+'alert-circle' as icon,
+'red' as color
+FROM Personne
+WHERE (LENGTH(:nom) < 1 AND Personne.SexePersonne ='M')
+AND Personne.IdPersonne = $IdPersonne ;
+
+
+select 
+    'form'            as component,
+	'Mettre à jour un utilisateur' AS title,
+    'maj_utilisateur.sql?IdPersonne=' || $IdPersonne  as action;
+SELECT 'nom' as name, Personne.NomPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'nomjf' as name, 'Nom de jeune fille' as label,Personne.NomJfPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne AND Personne.SexePersonne = 'F';
+SELECT 'prenom' as name,'Prénom' as label,Personne.PrenomPersonne as value, TRUE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
