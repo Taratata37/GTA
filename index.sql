@@ -1,4 +1,36 @@
+SELECT 'cookie' as component,
+        'IdSection' as name,
+        :IdSection as value
+WHERE :IdSection IS NOT NULL;
+SELECT 'redirect' AS component, 'index.sql' AS link
+WHERE :IdSection IS NOT NULL;;
+
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
+
+
+
+
+
+select 
+    'form'            as component,
+	'Sélectionnez la section' AS title,
+    'index.sql' as action;
+SELECT 'IdSection' as name,
+	'Section' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	TRUE as required,
+    json_group_array(
+		json_object(
+			'label', sec.NomSection,
+			'value', sec.IdSection,
+            'selected', sec.IdSection = sqlpage.cookie('IdSection')
+		)
+	) as options
+FROM section sec;
+
+
 
 
 
@@ -14,11 +46,13 @@ select
     'chart'   as component,
     'états des inscriptions' as title,
     'pie'     as type,
-    TRUE      as labels;
+    FALSE      as labels;
 select 
     titre as label,
     count(*)  as value
     FROM Status_Personne
+    NATURAL JOIN PERSONNE
+    WHERE IdSection = sqlpage.cookie('IdSection')
     GROUP BY titre;
 
     
@@ -26,10 +60,12 @@ select
     'table' as component,
 	'Nom' as markdown,
 	'Nom de jeune fille' as markdown,
-	'Liste des '|| count (*) ||' recommençants' as description,
+	'Liste des '|| count (*) ||' recommençants en section ' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection'))  as description,
     TRUE    as sort,
 	'état' as icon,
-    TRUE    as search from Personne;
+    TRUE    as search 
+    from Personne per
+    WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection');
 select 
     '[' || IiF(length (per.NomPersonne) < 1,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
     ,IiF(length (per.NomPersonne) < 1,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
@@ -42,4 +78,5 @@ select
 	)as "état"*/
 	sper.etat as 'état'
 FROM Personne per
-NATURAL JOIN Status_Personne sper;
+NATURAL JOIN Status_Personne sper
+WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection');

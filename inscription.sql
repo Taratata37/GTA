@@ -1,5 +1,5 @@
-INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,NomJfPersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne)
-SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,UPPER(:nomjf),:tel,:courriel, date('now')
+INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,NomJfPersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
+SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,UPPER(:nomjf),:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER)
 WHERE :nom IS NOT NULL 
 	AND (LENGTH(:nomjf) > 0 OR :sexe = 'M') 
 	AND (LENGTH(:nomjf) = 0 OR :sexe = 'F')
@@ -53,3 +53,16 @@ select
     '[{"label": "Masculin", "value": "M"}, {"label": "Féminin", "value": "F"}]' as options;
 SELECT 'courriel' as name,'Courriel' as label,:courriel as value, FALSE as required;
 SELECT 'tel' as name,'Téléphone' as label,:tel as value, FALSE as required;
+SELECT 'IdSection' as name,
+	'Section' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	TRUE as required,
+    json_group_array(
+		json_object(
+			'label', sec.NomSection,
+			'value', sec.IdSection
+		)
+	) as options
+FROM section sec;

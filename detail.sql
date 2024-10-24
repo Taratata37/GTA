@@ -80,6 +80,12 @@ SELECT 'Inscrit depuis le' as title,
 	STRFTIME('%d/%m/%Y',DateInscriptionPersonne) as description
 	FROM Personne
 	WHERE IdPersonne = $id;
+select 
+    'Section' as title,
+    sec.NomSection  as description
+	FROM Personne per
+	INNER JOIN Section sec ON sec.IdSection = per.IdSection
+	WHERE per.IdPersonne = $id;
 
 
 
@@ -137,8 +143,11 @@ select
     iif(Remplir.IdPersonne IS NULL, 'red','green')                 as color,
     iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check')       as icon
 FROM Formalite
-LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id );
+INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id )
+LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id )
+--WHERE Formalite.IdSection = 2
 
+;
 
 
 select 
