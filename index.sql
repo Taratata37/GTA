@@ -48,7 +48,7 @@ select
     'pie'     as type,
     FALSE      as labels;
 select 
-    titre as label,
+    REPLACE(titre,'Information','Personne absente') as label,
     count(*)  as value
     FROM Status_Personne
     NATURAL JOIN PERSONNE
