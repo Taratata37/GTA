@@ -1,9 +1,17 @@
-INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,NomJfPersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
-SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,UPPER(:nomjf),:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER)
+INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
+SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER)
 WHERE :nom IS NOT NULL 
-	AND (LENGTH(:nomjf) > 0 OR :sexe = 'M') 
-	AND (LENGTH(:nomjf) = 0 OR :sexe = 'F')
-	AND (LENGTH(:nom) > 0 OR :sexe = 'F') 
+    AND :sexe = 'M'
+	AND LENGTH(:nomep) = 0
+	AND LENGTH(:nom) > 0
+RETURNING 'redirect' AS component, 'index.sql' AS link;
+
+
+INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,NomJfPersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
+SELECT REPLACE(UPPER(:nomep),'6','-'),:prenom,:sexe,UPPER(:nom),:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER)
+WHERE :nom IS NOT NULL 
+	AND :sexe = 'F'
+	AND LENGTH(:nom) > 0
 RETURNING 'redirect' AS component, 'index.sql' AS link;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
@@ -13,18 +21,10 @@ select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as propertie
 SELECT 
 'alert' as component,
 'Erreur de saisie' as title,
-'Données incohérente : Nom de jeune fille impossible' as description,
+'Données incohérente : Nom d''épouse impossible' as description,
 'alert-circle' as icon,
 'red' as color
-WHERE (LENGTH(:nomjf) > 0 AND :sexe ='M') ;
-
-SELECT 
-'alert' as component,
-'Erreur de saisie' as title,
-'Données incohérente : Nom de jeune fille obligatoire' as description,
-'alert-circle' as icon,
-'red' as color
-WHERE (LENGTH(:nomjf) < 1 AND :sexe = 'F');
+WHERE (LENGTH(:nomep) > 0 AND :sexe ='M') ;
 
 SELECT 
 'alert' as component,
@@ -32,7 +32,7 @@ SELECT
 'Nom obligatoire' as description,
 'alert-circle' as icon,
 'red' as color
-WHERE (LENGTH(:nom) < 1 AND :sexe = 'M');
+WHERE (LENGTH(:nom) < 1);
 
 
 
@@ -42,7 +42,7 @@ select
 	'Ajouter un recommençant' AS title,
     'inscription.sql' as action;
 SELECT 'nom' as name,'Nom' as label, :nom as value, FALSE as required;
-SELECT 'nomjf' as name, 'Nom de jeune fille' as label,:nomjf as value, FALSE as required;
+SELECT 'nomep' as name, 'Nom d''épouse' as label,:nomep as value, FALSE as required;
 SELECT 'prenom' as name,'Prénom' as label,:prenom as value, TRUE as required;
 select 
     'sexe'  as name,
