@@ -13,7 +13,8 @@ select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as propertie
 
 select 
     'form'            as component,
-	'Sélectionnez la section' AS title,
+	(SELECT 'Sélectionnez la section'WHERE sqlpage.cookie('IdSection') IS  NULL) AS title,
+	'Changer la section active' as validate,
     'index.sql' as action;
 SELECT 'IdSection' as name,
 	'Section' as label,
@@ -37,16 +38,18 @@ FROM section sec;
 SELECT 
     'text' as component,
     '
-# Accueil - Vue synthétique
+# Accueil - Vue synthétique - '||(SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) ||'
 Cliquez sur un nom pour accéder à la fiche du recommençant.
-	' as contents_md;
+	' as contents_md
+	WHERE sqlpage.cookie('IdSection') IS NOT NULL;;
 	
 	
 select 
     'chart'   as component,
     'états des inscriptions' as title,
     'pie'     as type,
-    FALSE      as labels;
+    FALSE      as labels
+    WHERE sqlpage.cookie('IdSection') IS NOT NULL;
 select 
     REPLACE(titre,'Information','Personne absente') as label,
     count(*)  as value
