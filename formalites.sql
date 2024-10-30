@@ -2,7 +2,8 @@ INSERT INTO Formalite (NomFormalite, IdSection)
 SELECT :nom, CAST (:IdSection AS INTEGER)
 WHERE :nom IS NOT NULL;
 
-
+SELECT 'redirect' AS component, 'index.sql' AS link
+WHERE sqlpage.cookie('IdSection') IS NULL;
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 
 
