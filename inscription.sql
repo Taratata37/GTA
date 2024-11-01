@@ -4,7 +4,7 @@ WHERE :nom IS NOT NULL
     AND :sexe = 'M'
 	AND LENGTH(:nomep) = 0
 	AND LENGTH(:nom) > 0
-RETURNING 'redirect' AS component, 'index.sql' AS link;
+RETURNING 'redirect' AS component, 'detail.sql?id=' || IdPersonne AS link;
 
 
 INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,NomJfPersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
@@ -12,7 +12,7 @@ SELECT REPLACE(UPPER(:nomep),'6','-'),:prenom,:sexe,UPPER(:nom),:tel,:courriel, 
 WHERE :nom IS NOT NULL 
 	AND :sexe = 'F'
 	AND LENGTH(:nom) > 0
-RETURNING 'redirect' AS component, 'index.sql' AS link;
+RETURNING 'redirect' AS component, 'detail.sql?id=' || IdPersonne AS link;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 
