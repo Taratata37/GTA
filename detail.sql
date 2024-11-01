@@ -76,7 +76,7 @@ select
     TelephonePersonne  as description
 	FROM Personne
 	WHERE IdPersonne = $id;
-SELECT 'Inscrit depuis le' as title,
+SELECT 'Date d''inscription' as title,
 	STRFTIME('%d/%m/%Y',DateInscriptionPersonne) as description
 	FROM Personne
 	WHERE IdPersonne = $id;
@@ -85,6 +85,11 @@ select
     sec.NomSection  as description
 	FROM Personne per
 	INNER JOIN Section sec ON sec.IdSection = per.IdSection
+	WHERE per.IdPersonne = $id;
+select 
+    'Adresse' as title,
+    per.RuePersonne ||  ' - '  || per.CpPersonne ||  ' '  || per.VillePersonne  as description
+	FROM Personne per
 	WHERE per.IdPersonne = $id;
 
 

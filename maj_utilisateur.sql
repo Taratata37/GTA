@@ -4,6 +4,9 @@ PrenomPersonne = :prenom,
 TelephonePersonne = :telephone,
 CourrielPersonne = :courriel,
 NomJfPersonne = UPPER(:nomjf)
+,RuePersonne = :rue
+,CpPersonne = :cp
+,VillePersonne = :ville
 WHERE IdPersonne = $IdPersonne 
 AND :nom IS NOT NULL
 AND (LENGTH(:nomjf) > 0 OR Personne.SexePersonne = 'M') 
@@ -51,3 +54,6 @@ SELECT 'nomjf' as name, 'Nom de jeune fille' as label,Personne.NomJfPersonne as 
 SELECT 'prenom' as name,'Prénom' as label,Personne.PrenomPersonne as value, TRUE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;

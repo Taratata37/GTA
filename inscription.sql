@@ -1,5 +1,5 @@
-INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
-SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER)
+INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection, RuePersonne, CpPersonne, VillePersonne)
+SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER),:rue ,:cp,:ville 
 WHERE :nom IS NOT NULL 
     AND :sexe = 'M'
 	AND LENGTH(:nomep) = 0
@@ -66,3 +66,6 @@ SELECT 'IdSection' as name,
 		)
 	) as options
 FROM section sec;
+SELECT 'rue' as name,'Rue' as label,:rue as value, FALSE as required;
+SELECT 'cp' as name,'Code postal' as label,:cp as value, FALSE as required;
+SELECT 'ville' as name,'Ville' as label,:ville as value, FALSE as required;

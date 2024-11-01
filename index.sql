@@ -51,7 +51,7 @@ select
     FALSE      as labels
     WHERE sqlpage.cookie('IdSection') IS NOT NULL;
 select 
-    REPLACE(titre,'Information','Personne absente') as label,
+    titre as label,
     count(*)  as value
     FROM Status_Personne
     NATURAL JOIN PERSONNE
