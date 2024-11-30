@@ -12,7 +12,7 @@ AND :nom IS NOT NULL
 AND (LENGTH(:nomjf) > 0 OR Personne.SexePersonne = 'M') 
 AND (:nomjf IS NULL OR Personne.SexePersonne = 'F')
 AND (LENGTH(:nom) > 0 OR Personne.SexePersonne = 'F') 
-RETURNING 'redirect' AS component, 'index.sql' AS link;
+RETURNING 'redirect' AS component, 'detail.sql?id=' || $IdPersonne AS link;
 
 SELECT 
 'alert' as component,
