@@ -19,9 +19,12 @@ select
 select 
     'table' as component,
 	'Nom' as markdown,
-	'Feuille de présence' as description,
+	'Feuille de présence des ' || count(*) || ' personnes présentes le ' || COALESCE(:jour,date('now')) as description,
     TRUE    as sort,
-    TRUE    as search;
+    TRUE    as search
+FROM Personne
+NATURAL JOIN Venir
+WHERE date = COALESCE(:jour,date('now'));
 
 select 
     NomPersonne  as Nom,
