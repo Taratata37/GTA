@@ -39,7 +39,7 @@ WHERE (LENGTH(:nom) < 1);
 
 select 
     'form'            as component,
-	'Ajouter un recommençant' AS title,
+	'Ajouter un participant' AS title,
     'inscription.sql' as action;
 SELECT 'nom' as name,'Nom' as label, :nom as value, FALSE as required;
 SELECT 'nomep' as name, 'Nom d''épouse' as label,:nomep as value, FALSE as required;
