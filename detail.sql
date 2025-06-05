@@ -114,7 +114,7 @@ select
 	
 select 
     'form'            as component,
-	'Sacrements demandés' AS title,
+	'Accompagnement demandé' AS title,
 	'MAJ sacrements' as validate,
     'demander.sql?id=' || $id as action;
 SELECT 'nom_s[]' as name,

@@ -11,7 +11,7 @@ SELECT
     'text' as component,
     '
 # Liste des formalités existantes
-Les recommençant sont appelés à remplir l''ensemble des formalités suivantes  dans la section 
+Les recommençants sont appelés à remplir l''ensemble des formalités suivantes  dans la section 
 	' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) as contents_md;
 select 
     'card'                     as component;
