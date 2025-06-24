@@ -28,19 +28,37 @@ select DISTINCT
 	,Personne.PrenomPersonne as Prénom
 	,Personne.CourrielPersonne as Courriel
 	,Remplir.CommentaireFormalite as parrain
-	,remplir2.CommentaireFormalite as "certificat de baptème"
+,remplir2.CommentaireFormalite as "certificat de baptème"
+	 , (
+        SELECT libelle
+        FROM (
+            SELECT ven.codeType_evenement
+            ,CASE ven.codeType_evenement
+                    WHEN 'ACCUE' THEN 'Accueilli'
+                    WHEN 'ENTRE' THEN 'Catéchumène'
+                    WHEN 'APDEC' THEN 'Catéchumène'
+                    WHEN 'SCRMT' THEN 'Néophyte'
+                    ELSE ''
+            END libelle 
+            ,CASE ven.codeType_evenement
+                    WHEN 'ACCUE' THEN 1
+                    WHEN 'ENTRE' THEN 2
+                    WHEN 'APDEC' THEN 3
+                    WHEN 'SCRMT' THEN 4
+                    ELSE 0
+            END ordre 
+            FROM Venir ven
+            WHERE ven.IdPersonne = Personne.IdPersonne
+           ORDER BY ordre desc
+        )
+        LIMIT 1
+    ) AS 'Étape de cheminement'
 FROM Personne Personne
-CROSS JOIN Formalite 
-CROSS JOIN Formalite forma2
+LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND Formalite.NomFormalite LIKE '%parrain%'
+LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND  forma2.NomFormalite LIKE '%baptême%'
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
-LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite
+LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
-AND Formalite.IdSection = sqlpage.cookie('IdSection')
-AND Formalite.NomFormalite LIKE '%parrain%'
-AND forma2.IdSection = sqlpage.cookie('IdSection')
-AND forma2.NomFormalite LIKE '%baptême%'
---AND forma2.IdSection = sqlpage.cookie('IdSection')
-;
 
 
 
@@ -59,15 +77,36 @@ select DISTINCT
 	,Personne.CourrielPersonne as Courriel
 	,Remplir.CommentaireFormalite as parrain
 	,remplir2.CommentaireFormalite as "certificat de baptème"
+	 , (
+        SELECT libelle
+        FROM (
+            SELECT ven.codeType_evenement
+            ,CASE ven.codeType_evenement
+                    WHEN 'ACCUE' THEN 'Accueilli'
+                    WHEN 'ENTRE' THEN 'Catéchumène'
+                    WHEN 'APDEC' THEN 'Catéchumène'
+                    WHEN 'SCRMT' THEN 'Néophyte'
+                    ELSE ''
+            END libelle 
+            ,CASE ven.codeType_evenement
+                    WHEN 'ACCUE' THEN 1
+                    WHEN 'ENTRE' THEN 2
+                    WHEN 'APDEC' THEN 3
+                    WHEN 'SCRMT' THEN 4
+                    ELSE 0
+            END ordre 
+            FROM Venir ven
+            WHERE ven.IdPersonne = Personne.IdPersonne
+           ORDER BY ordre desc
+        )
+        LIMIT 1
+    ) AS 'Étape de cheminement'
 FROM Personne Personne
-CROSS JOIN Formalite 
-CROSS JOIN Formalite forma2
+LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND Formalite.NomFormalite LIKE '%parrain%'
+LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND  forma2.NomFormalite LIKE '%baptême%'
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
-LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite
+LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
-AND Formalite.IdSection = sqlpage.cookie('IdSection')
-AND Formalite.NomFormalite LIKE '%parrain%'
-AND forma2.IdSection = sqlpage.cookie('IdSection')
-AND forma2.NomFormalite LIKE '%baptême%'
+
 --AND forma2.IdSection = sqlpage.cookie('IdSection')
 ;

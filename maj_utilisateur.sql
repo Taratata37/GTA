@@ -7,6 +7,7 @@ NomJfPersonne = UPPER(:nomjf)
 ,RuePersonne = :rue
 ,CpPersonne = :cp
 ,VillePersonne = :ville
+,IdDoyenne = :IdDoyenne
 WHERE IdPersonne = $IdPersonne 
 AND :nom IS NOT NULL
 AND (LENGTH(:nomjf) > 0 OR Personne.SexePersonne = 'M') 
@@ -57,3 +58,20 @@ SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as 
 SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'IdDoyenne' as name,
+	'Doyenne' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	FALSE as required,
+    json_group_array(
+		json_object(
+			'label', doy.NomDoyenne,
+			'value', doy.IdDoyenne,
+            'selected', per.IdDoyenne is not null
+		)
+	) as options
+FROM Doyenne doy
+LEFT JOIN personne per ON per.IdDoyenne = doy.idDoyenne
+WHERE per.IdPersonne = $IdPersonne OR per.idPersonne is null ;
+

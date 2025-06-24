@@ -2,8 +2,12 @@ SELECT 'cookie' as component,
         'IdSection' as name,
         :IdSection as value
 WHERE :IdSection IS NOT NULL;
+SELECT 'cookie' as component,
+        'IdPromotion' as name,
+        :IdPromotion as value
+WHERE :IdPromotion IS NOT NULL;
 SELECT 'redirect' AS component, 'index.sql' AS link
-WHERE :IdSection IS NOT NULL;;
+WHERE :IdSection IS NOT NULL OR :IdPromotion IS NOT NULL;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 
@@ -30,6 +34,20 @@ SELECT 'IdSection' as name,
 		)
 	) as options
 FROM section sec;
+SELECT 'IdPromotion' as name,
+	'Promotion' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	TRUE as required,
+    json_group_array(
+		json_object(
+			'label', pro.NomPromotion,
+			'value', pro.IdPromotion,
+            'selected', pro.NomPromotion = sqlpage.cookie('IdPromotion')
+		)
+	) as options
+FROM promotion pro;
 
 
 
@@ -38,8 +56,9 @@ FROM section sec;
 SELECT 
     'text' as component,
     '
-# Accueil - Vue synthétique - '||(SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) ||'
-Cliquez sur un nom pour accéder à la fiche du recommençant.
+# Accueil - Vue synthétique - '||(SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) 
+||' - '||(SELECT pro.NomPromotion FROM Promotion pro WHERE pro.IdPromotion = sqlpage.cookie('IdPromotion')) ||'
+Cliquez sur un nom pour accéder à la fiche de la personne.
 	' as contents_md
 	WHERE sqlpage.cookie('IdSection') IS NOT NULL;;
 	
@@ -63,23 +82,21 @@ select
     'table' as component,
 	'Nom' as markdown,
 	'Nom de jeune fille' as markdown,
-	'Liste des '|| count (*) ||' recommençants en section ' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection'))  as description,
+	'Liste des '|| count (*) ||' personnes en section ' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection'))  as description,
     TRUE    as sort,
 	'état' as icon,
     TRUE    as search 
     from Personne per
-    WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection');
+    WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
+    AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion');
 select 
     '[' || IiF(length (per.NomPersonne) < 1,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
     ,IiF(length (per.NomPersonne) < 1,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
 	,per.PrenomPersonne as Prénom
-    --,CourrielPersonne as Courriel
-	, /*iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"alert-triangle", -- Le dossier initial est incomplet
-		iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-			iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","file-report"),
-					"user-search")
-	)as "état"*/
-	sper.etat as 'état'
+    ,doy.NomDoyenne as 'Doyenné'
+	,sper.etat as 'état'
 FROM Personne per
+LEFT JOIN doyenne doy on doy.IdDoyenne = per.IdDoyenne
 NATURAL JOIN Status_Personne sper
-WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection');
+WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
+AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion');

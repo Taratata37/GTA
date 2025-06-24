@@ -1,17 +1,42 @@
-INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection, RuePersonne, CpPersonne, VillePersonne)
-SELECT REPLACE(UPPER(:nom),'6','-'),:prenom,:sexe,:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER),:rue ,:cp,:ville 
-WHERE :nom IS NOT NULL 
-    AND :sexe = 'M'
-	AND LENGTH(:nomep) = 0
-	AND LENGTH(:nom) > 0
-RETURNING 'redirect' AS component, 'detail.sql?id=' || IdPersonne AS link;
-
-
-INSERT INTO Personne (NomPersonne, PrenomPersonne, SexePersonne,NomJfPersonne,TelephonePersonne, CourrielPersonne, DateinscriptionPersonne, IdSection)
-SELECT REPLACE(UPPER(:nomep),'6','-'),:prenom,:sexe,UPPER(:nom),:tel,:courriel, date('now'), CAST (:IdSection AS INTEGER)
-WHERE :nom IS NOT NULL 
-	AND :sexe = 'F'
-	AND LENGTH(:nom) > 0
+INSERT INTO Personne (
+    NomPersonne, 
+    PrenomPersonne, 
+    SexePersonne, 
+    NomJfPersonne,
+    TelephonePersonne, 
+    CourrielPersonne, 
+    DateinscriptionPersonne, 
+    IdSection, 
+    IdPromotion, 
+    RuePersonne, 
+    CpPersonne, 
+    VillePersonne, 
+    IdDoyenne
+)
+SELECT 
+    CASE 
+        WHEN :sexe = 'M' THEN REPLACE(UPPER(:nom), '6', '-')
+        ELSE REPLACE(UPPER(:nomep), '6', '-')
+    END,
+    :prenom,
+    :sexe,
+    CASE 
+        WHEN :sexe = 'F' THEN REPLACE(UPPER(:nom), '6', '-')
+        ELSE NULL
+    END,
+    :tel,
+    :courriel,
+    date('now'),
+    CAST(:IdSection AS INTEGER),
+    CAST(:IdPromotion AS INTEGER),
+    :rue,
+    :cp,
+    :ville,
+    CAST(:IdDoyenne AS INTEGER)
+WHERE :nom IS NOT NULL
+    AND :sexe IN ('M', 'F')
+    AND LENGTH(:nom) > 0
+    AND (:sexe = 'F' OR LENGTH(:nomep) = 0 )
 RETURNING 'redirect' AS component, 'detail.sql?id=' || IdPersonne AS link;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
@@ -62,10 +87,39 @@ SELECT 'IdSection' as name,
     json_group_array(
 		json_object(
 			'label', sec.NomSection,
-			'value', sec.IdSection
+			'value', sec.IdSection,
+            'selected',sec.IdSection =sqlpage.cookie('IdSection')
 		)
 	) as options
 FROM section sec;
+SELECT 'IdPromotion' as name,
+	'Promotion' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	TRUE as required,
+    json_group_array(
+		json_object(
+			'label', pro.NomPromotion,
+			'value', pro.IdPromotion,
+            'selected',pro.IdPromotion =sqlpage.cookie('IdPromotion')
+		)
+	) as options
+FROM promotion pro;
 SELECT 'rue' as name,'Rue' as label,:rue as value, FALSE as required;
 SELECT 'cp' as name,'Code postal' as label,:cp as value, FALSE as required;
 SELECT 'ville' as name,'Ville' as label,:ville as value, FALSE as required;
+SELECT 'IdDoyenne' as name,
+	'Doyenne' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	FALSE as required,
+    json_group_array(
+		json_object(
+			'label', doy.NomDoyenne,
+			'value', doy.IdDoyenne
+		)
+	) as options
+FROM Doyenne doy;
+
