@@ -1,21 +1,37 @@
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 	
+	
+
 select 
     'form'            as component,
-    'Afficher les présences' as validate,
-	'presence.sql' as action;
+	'Afficher les présences' AS title,
+	'Enregistrer' as validate,
+    'presence.sql' as action;
+SELECT 'jour' as name,
+	'jour de présence' as label,
+	'select' as type,
+    TRUE     as searchable,
+	FALSE    as multiple,
+	TRUE as required,
+    json_group_array(
+		json_object(
+			'label', 	ven.date,
+			'value', 	ven.date,
+			'selected', ven.date = :jour
+		)
+	) as options
+	from (
+		SELECT DISTINCT ven1.date
+		FROM Venir ven1
+		INNER JOIN personne
+		on  personne.IdPersonne = ven1.IdPersonne
+		WHERE cast(Personne.IdSection as text) = sqlpage.cookie('IdSection')
+		AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+	) ven
+   ;	
+
 	
-select 
-    'jour de présence' as label,
-	'jour' as name,
-    'date'       as type,
-    '2020-01-01' as min,
-	date('now') as max,
-    COALESCE(:jour, date('now')) as value,
-	TRUE       as required;
-	
-	
-	
+
 select 
     'table' as component,
 	'Nom' as markdown,
@@ -31,9 +47,16 @@ select
     NomJfPersonne as "Nom de jeune fille",
 	PrenomPersonne as Prénom,
 	(SELECT GROUP_CONCAT(COALESCE(Sacrement.NomSacrement,'-'))FROM Demander NATURAL JOIN Sacrement WHERE Personne.IdPersonne = Demander.IdPersonne) as "Sacrements demandés"
+	, COALESCE(t.color,'red') as _sqlpage_color
 FROM Personne
-NATURAL JOIN Venir
-WHERE date = COALESCE(:jour,date('now'))
+LEFT JOIN (
+	SELECT IdPersonne as IdPersonne
+	, 'green' as color
+	FROM Venir 
+	WHERE date = COALESCE(:jour,date('now'))
+)t ON Personne.IdPersonne = t.IdPersonne
+WHERE cast(Personne.IdSection as text) = sqlpage.cookie('IdSection')
+AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion');
 ;
 
 Select 

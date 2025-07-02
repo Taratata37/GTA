@@ -59,7 +59,7 @@ LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
-
+AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion');
 
 
 
@@ -107,6 +107,6 @@ LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
-
+AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion');
 --AND forma2.IdSection = sqlpage.cookie('IdSection')
 ;

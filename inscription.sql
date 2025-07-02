@@ -11,7 +11,8 @@ INSERT INTO Personne (
     RuePersonne, 
     CpPersonne, 
     VillePersonne, 
-    IdDoyenne
+    IdDoyenne,
+    pinPersonne
 )
 SELECT 
     CASE 
@@ -32,7 +33,8 @@ SELECT
     :rue,
     :cp,
     :ville,
-    CAST(:IdDoyenne AS INTEGER)
+    CAST(:IdDoyenne AS INTEGER),
+    substr(random(),5,6) || substr(random(),5,6)
 WHERE :nom IS NOT NULL
     AND :sexe IN ('M', 'F')
     AND LENGTH(:nom) > 0

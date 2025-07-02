@@ -27,7 +27,7 @@ select DISTINCT
 FROM Formalite
 CROSS JOIN Personne
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Formalite.IdFormalite = Remplir.IdFormalite
-WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection')
+WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection') AND Personne.IdPromotion = sqlpage.cookie('IdPromotion')
 ;
 
 Select 
@@ -48,5 +48,5 @@ select DISTINCT
 FROM Formalite
 CROSS JOIN Personne
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Formalite.IdFormalite = Remplir.IdFormalite
-WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection')
+WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection') AND Personne.IdPromotion = sqlpage.cookie('IdPromotion')
 ;

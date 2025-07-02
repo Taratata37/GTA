@@ -44,7 +44,7 @@ SELECT 'IdPromotion' as name,
 		json_object(
 			'label', pro.NomPromotion,
 			'value', pro.IdPromotion,
-            'selected', pro.NomPromotion = sqlpage.cookie('IdPromotion')
+            'selected', pro.IdPromotion = sqlpage.cookie('IdPromotion')
 		)
 	) as options
 FROM promotion pro;
@@ -75,6 +75,7 @@ select
     FROM Status_Personne
     NATURAL JOIN PERSONNE
     WHERE IdSection = sqlpage.cookie('IdSection')
+    AND IdPromotion = sqlpage.cookie('IdPromotion')
     GROUP BY titre;
 
     
@@ -100,3 +101,5 @@ LEFT JOIN doyenne doy on doy.IdDoyenne = per.IdDoyenne
 NATURAL JOIN Status_Personne sper
 WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
 AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion');
+
+

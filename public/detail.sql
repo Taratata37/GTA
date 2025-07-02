@@ -1,6 +1,18 @@
-select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
+SELECT
+    'redirect' AS component,
+    'login.sql' AS link
+WHERE NOT EXISTS  (SELECT 1 FROM personne WHERE idPersonne = $id AND pinPersonne = $pin AND DateInscriptionPersonne  > date('now', '-18 months'));
 
+/*
+select 
+    'shell'                     as component,
+    'GTA - Gestion des Tracasseries Administratives' as title,
+    'database'                  as icon,
+    'boxed'                     as layout,
+    '#'                         as link,
+    'fr-FR'                     as language;
 
+*/
 SELECT 
 'alert' as component,
 etatresume.titre as title,
@@ -8,35 +20,6 @@ etatresume.description as description,
 etatresume.couleur as color,
 etatresume.etat as icon
 FROM Status_Personne etatresume
-/*
-FROM(  
-		select
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"alert-triangle", -- Le dossier initial est incomplet
-				iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-					iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","file-report"),
-					"user-search")
-		) as etat 
-		,
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"Dossier incomplet", -- Le dossier initial est incomplet
-			iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-					iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","Formalités incomplètes"),
-					"Information")
-		) as titre
-		,
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"Il manque un moyen de contact ou un sacrement demandé pour compléter le dossier de ce recommençant", -- Le dossier initial est incomplet
-			iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-				iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","Il reste des formalités à remplir par ce recommençant"),
-					"Cette personne n'est pour l'instant venue à aucune rencontre diocésaine")
-		) as description
-		,
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"orange", -- Le dossier initial est incomplet
-			iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-				iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","blue"),
-					"dark-grey")
-		) as couleur
-		FROM Personne Where Personne.IdPersonne = $id
-
-) etatresume*/
 WHERE length(etatresume.etat) > 1 and etatresume.IdPersonne = $id;
 
 
@@ -50,7 +33,17 @@ $majok as description,
 WHERE $majok is not null;
 
 
+Select 
+'text' as component,
+'# Récaputilatif personnel - diocèse de Tours
+Bienvenue sur la page récapitulant l''état actuel de votre dossier.
+La visibilité sur certaines données personnelle est réduite pour des questions de sécurité.
 
+Conformément à la législation en vigueur, vous disposez d'' un droit d''accès et de rectification de vos données. 
+Veuillez contacter votre responsable de doyenné si vous constatez une erreur dans votre dossier.
+
+Vos données personnelles ne seront plus accessible sur cette page à partir de 18 mois d''ancienneté, et seront supprimées rapidement après.
+' as contents_md;
 
 select 
     'steps' as component,
@@ -61,7 +54,7 @@ select
     INNER JOIN Sacrement sac ON dem.IdSacrement = sac.IdSacrement
     WHERE dem.IdPersonne = $id AND sac.NomSacrement = 'Baptême'
 ) ;
-SELECT title, active, link FROM (
+SELECT title, active FROM (
 	SELECT * FROM(
     SELECT 'Accueil' as title,
            CASE WHEN accueil.IdPersonne IS NULL THEN TRUE ELSE FALSE END as active,
@@ -137,11 +130,13 @@ select
 	FROM Personne WHERE IdPersonne = $id;
 select 
     'Téléphone' as title,
-    TelephonePersonne  as description
+     SUBSTR(TelephonePersonne, 1, LENGTH(TelephonePersonne) - 2) || 'XX'  as description
 	FROM Personne
 	WHERE IdPersonne = $id;
-SELECT 'Date d''inscription' as title,
-	STRFTIME('%d/%m/%Y',DateInscriptionPersonne) as description
+SELECT
+    'Ancienneté en mois' AS title,
+    CAST((STRFTIME('%m', 'now') - STRFTIME('%m', DateInscriptionPersonne) +
+          (STRFTIME('%Y', 'now') - STRFTIME('%Y', DateInscriptionPersonne)) * 12) AS INTEGER) AS description
 	FROM Personne
 	WHERE IdPersonne = $id;
 select 
@@ -164,50 +159,21 @@ select
 	WHERE per.IdPersonne = $id;
 select 
     'Adresse' as title,
-    per.RuePersonne ||  ' - '  || per.CpPersonne ||  ' '  || per.VillePersonne  as description
+    'XXXXX, ' || per.CpPersonne ||  ' '  || per.VillePersonne  as description
 	FROM Personne per
 	WHERE per.IdPersonne = $id;
-select 
-	'Accès espace en ligne' as title,
-	pinPersonne  as description
-    ,'/public/detail.sql?id=' || IdPersonne || '&pin='|| pinPersonne as link
-	FROM Personne WHERE IdPersonne = $id;
-
-
-select 
-    'button' as component,
-    'center' as justify;
-SELECT
-    'noter_presence.sql?id=' || $id || '&codeevt=RECOL' as link,
-    'success' as color,
-    'Valider la présence ce jour' as title,
-    COALESCE((SELECT 1 FROM Venir ven WHERE ven.IdPersonne = per.IdPersonne AND ven.date = date('now') LIMIT 1), FALSE) as disabled
-FROM
-    Personne per
-WHERE
-    $id IS NOT NULL
-    AND per.IdPersonne = $id;
-SELECT
-    'noter_presence.sql?id=' || $id as link,
-    'white' as color,
-    'Valider la présence ...' as title;
-select 
-    'maj_utilisateur.sql?IdPersonne=' || $id  as link,
-    'blue' as color,
-    'Modifier les coordonnées' as title;
-
-	
 	
 select 
     'form'            as component,
 	'Accompagnement demandé' AS title,
 	'Enregistrer' as validate,
-    'demander.sql?id=' || $id as action;
+    '#'  as action;
 SELECT 'nom_s[]' as name,
 	'' as label,
 	'select' as type,
     TRUE     as searchable,
-	TRUE             as multiple,
+     TRUE     as disabled,
+	TRUE     as multiple,
 	'press ctrl to select multiple values' as description,
 	TRUE as required,
     json_group_array(
@@ -229,8 +195,7 @@ select
     'Formalités' as title;
 select 
     Formalite.NomFormalite             as title,
-    'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE (Remplir.IdPersonne,'-1') as link,
-    Remplir.CommentaireFormalite ||' - Cliquez pour changer l''état'    as description,
+    Remplir.CommentaireFormalite as description,
     iif(Remplir.IdPersonne IS NULL, 'red','green')                 as color,
     iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check')       as icon
 FROM Formalite
@@ -245,22 +210,10 @@ select
 	'table' as component,
 	TRUE    as hover,
 	TRUE    as striped_rows,
-    'supprimer' as markdown,
 	'Dates auxquelles la personne était présente' as description,
 	'Personne présente à aucune réunion' as empty_description,
 	TRUE    as small; 
-SELECT STRFTIME('%d/%m/%Y',DATE) as date
-, NomType_evenement as 'Evènement'
-,'[supprimer](supprimer_presence.sql?IdPersonne=' || $id || '&date=' || date || '&codeevt=' || Venir.codeType_evenement || ')' as supprimer
+SELECT STRFTIME('%d/%m/%Y',DATE) as date,NomType_evenement as 'Evènement'
 FROM Venir
 LEFT JOIN type_evenement ON type_evenement.codeType_evenement = venir.codeType_evenement
 WHERE IdPersonne = $id;
-
-
-
-select 
-    'foldable' as component;
-select 
-    'Zone de danger' as title,
-    'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! Cliquez [ici](suppr_utilisateur.sql?IdPersonne=' || $id || ') pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.' as description_md,
-    FALSE                as expanded;
