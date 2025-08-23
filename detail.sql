@@ -262,5 +262,5 @@ select
     'foldable' as component;
 select 
     'Zone de danger' as title,
-    'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! Cliquez [ici](suppr_utilisateur.sql?IdPersonne=' || $id || ') pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.' as description_md,
+    'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! Cliquez [ici](/admin/suppr_utilisateur.sql?IdPersonne=' || $id || ') pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.' as description_md,
     FALSE                as expanded;

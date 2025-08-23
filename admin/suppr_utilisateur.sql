@@ -6,4 +6,4 @@ DELETE FROM Demander
 WHERE IdPersonne = $IdPersonne ;
 DELETE FROM Personne 
 WHERE IdPersonne = $IdPersonne ;
-SELECT 'redirect' AS component, 'index.sql' AS link;
+SELECT 'redirect' AS component, '../index.sql' AS link;
