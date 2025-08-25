@@ -1,3 +1,16 @@
+SELECT 'redirect' AS component, 'index' AS link
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM session_connexion scn
+    INNER JOIN personne per ON per.idDoyenne = scn.IdDoyenne OR per.idDoyenne IS NULL
+    WHERE (
+        EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+        OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    )
+    AND per.idPersonne = $id
+);
+
+
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 
 

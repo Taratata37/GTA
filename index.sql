@@ -1,3 +1,12 @@
+SELECT 'redirect' AS component, 'login' AS link
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM session_connexion
+    WHERE jeton = sqlpage.cookie('jeton_session')
+);
+
+
+
 SELECT 'cookie' as component,
         'IdSection' as name,
         :IdSection as value
@@ -76,6 +85,7 @@ select
     NATURAL JOIN PERSONNE
     WHERE IdSection = sqlpage.cookie('IdSection')
     AND IdPromotion = sqlpage.cookie('IdPromotion')
+    AND ( IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_connexion') )) 
     GROUP BY titre;
 
     
@@ -89,7 +99,11 @@ select
     TRUE    as search 
     from Personne per
     WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
-    AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion');
+    AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+    AND (
+        EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+        OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    );
 select 
     '[' || IiF(length (per.NomPersonne) < 1,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
     ,IiF(length (per.NomPersonne) < 1,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
@@ -100,6 +114,11 @@ FROM Personne per
 LEFT JOIN doyenne doy on doy.IdDoyenne = per.IdDoyenne
 NATURAL JOIN Status_Personne sper
 WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
-AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion');
+AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+)
+;
 
 

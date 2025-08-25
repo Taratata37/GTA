@@ -1,4 +1,4 @@
-SELECT 'redirect' AS component, 'index.sql' AS link
+SELECT 'redirect' AS component, '../index.sql' AS link
 WHERE sqlpage.cookie('IdSection') IS NULL;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
@@ -28,6 +28,10 @@ FROM Formalite
 CROSS JOIN Personne
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Formalite.IdFormalite = Remplir.IdFormalite
 WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection') AND Personne.IdPromotion = sqlpage.cookie('IdPromotion')
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+)
 ;
 
 Select 
@@ -49,4 +53,8 @@ FROM Formalite
 CROSS JOIN Personne
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Formalite.IdFormalite = Remplir.IdFormalite
 WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection') AND Personne.IdPromotion = sqlpage.cookie('IdPromotion')
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+)
 ;

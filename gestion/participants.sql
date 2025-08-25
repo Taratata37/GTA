@@ -1,4 +1,4 @@
-SELECT 'redirect' AS component, 'index.sql' AS link
+SELECT 'redirect' AS component, '../index.sql' AS link
 WHERE sqlpage.cookie('IdSection') IS NULL;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
@@ -59,7 +59,11 @@ LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
-AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion');
+AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+);
 
 
 
@@ -107,6 +111,10 @@ LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
-AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion');
+AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+);
 --AND forma2.IdSection = sqlpage.cookie('IdSection')
 ;

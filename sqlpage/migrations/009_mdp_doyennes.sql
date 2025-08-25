@@ -1,0 +1,2 @@
+ALTER TABLE Doyenne
+ADD COLUMN mot_de_passe VARCHAR(255);

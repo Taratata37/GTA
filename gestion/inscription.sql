@@ -1,3 +1,10 @@
+SELECT 'redirect' AS component, '../login' AS link
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM session_connexion
+    WHERE jeton = sqlpage.cookie('jeton_session')
+);
+
 INSERT INTO Personne (
     NomPersonne, 
     PrenomPersonne, 
@@ -33,7 +40,7 @@ SELECT
     :rue,
     :cp,
     :ville,
-    CAST(:IdDoyenne AS INTEGER),
+    COAlESCE( ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') ), CAST(:IdDoyenne AS INTEGER)),
     substr(random(),5,6) || substr(random(),5,6)
 WHERE :nom IS NOT NULL
     AND :sexe IN ('M', 'F')
@@ -111,17 +118,29 @@ FROM promotion pro;
 SELECT 'rue' as name,'Rue' as label,:rue as value, FALSE as required;
 SELECT 'cp' as name,'Code postal' as label,:cp as value, FALSE as required;
 SELECT 'ville' as name,'Ville' as label,:ville as value, FALSE as required;
-SELECT 'IdDoyenne' as name,
-	'Doyenne' as label,
-	'select' as type,
-    TRUE     as searchable,
-	FALSE    as multiple,
-	FALSE as required,
-    json_group_array(
-		json_object(
-			'label', doy.NomDoyenne,
-			'value', doy.IdDoyenne
-		)
-	) as options
-FROM Doyenne doy;
+select * FROM(
+    SELECT 'IdDoyenne' as name,
+	    'Doyenne' as label,
+	    'select' as type,
+        TRUE     as searchable,
+	    FALSE    as multiple,
+	    FALSE as required,
+        json_group_array(
+		    json_object(
+			    'label', doy.NomDoyenne,
+			    'value', doy.IdDoyenne
+		    )
+	    ) as options
+    FROM Doyenne doy
+) t
+WHERE EXISTS ( SELECT '1' FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
+select 
+    'nom_doyenne' as name,
+    'Doyenné' as label,
+    TRUE        as disabled,
+    doy.nomdoyenne as value
+FROM Doyenne doy
+INNER JOIN session_connexion scn ON scn.idDoyenne = doy.IdDoyenne
+WHERE scn.jeton = sqlpage.cookie('jeton_session') 
+;
 

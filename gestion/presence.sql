@@ -1,3 +1,10 @@
+SELECT 'redirect' AS component, '../login' AS link
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM session_connexion
+    WHERE jeton = sqlpage.cookie('jeton_session')
+);
+
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 	
 	
@@ -40,7 +47,11 @@ select
     TRUE    as search
 FROM Personne
 NATURAL JOIN Venir
-WHERE date = COALESCE(:jour,date('now'));
+WHERE date = COALESCE(:jour,date('now'))
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+);
 
 select 
     NomPersonne  as Nom,
@@ -56,7 +67,11 @@ LEFT JOIN (
 	WHERE date = COALESCE(:jour,date('now'))
 )t ON Personne.IdPersonne = t.IdPersonne
 WHERE cast(Personne.IdSection as text) = sqlpage.cookie('IdSection')
-AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion');
+AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+)
 ;
 
 Select 
@@ -77,4 +92,8 @@ select
 FROM Personne
 NATURAL JOIN Venir
 WHERE date = COALESCE(:jour,date('now'))
+AND (
+    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+)
 ;
