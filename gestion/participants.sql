@@ -1,6 +1,13 @@
 SELECT 'redirect' AS component, '../index.sql' AS link
 WHERE sqlpage.cookie('IdSection') IS NULL;
 
+SELECT 'redirect' AS component, '../login.sql' AS link
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM v_sessions_valides
+    WHERE jeton = sqlpage.cookie('jeton_session')
+);
+
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 
 	
@@ -61,8 +68,8 @@ LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remp
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
 AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
 );
 
 
@@ -113,8 +120,8 @@ LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remp
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
 AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
 );
 --AND forma2.IdSection = sqlpage.cookie('IdSection')
 ;

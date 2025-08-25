@@ -1,7 +1,7 @@
 SELECT 'redirect' AS component, '../login' AS link
 WHERE NOT EXISTS (
     SELECT 1
-    FROM session_connexion
+    FROM v_sessions_valides
     WHERE jeton = sqlpage.cookie('jeton_session')
 );
 
@@ -40,7 +40,7 @@ SELECT
     :rue,
     :cp,
     :ville,
-    COAlESCE( ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') ), CAST(:IdDoyenne AS INTEGER)),
+    COAlESCE( ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') ), CAST(:IdDoyenne AS INTEGER)),
     substr(random(),5,6) || substr(random(),5,6)
 WHERE :nom IS NOT NULL
     AND :sexe IN ('M', 'F')
@@ -133,14 +133,14 @@ select * FROM(
 	    ) as options
     FROM Doyenne doy
 ) t
-WHERE EXISTS ( SELECT '1' FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
+WHERE EXISTS ( SELECT '1' FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
 select 
     'nom_doyenne' as name,
     'Doyenné' as label,
     TRUE        as disabled,
     doy.nomdoyenne as value
 FROM Doyenne doy
-INNER JOIN session_connexion scn ON scn.idDoyenne = doy.IdDoyenne
+INNER JOIN v_sessions_valides scn ON scn.idDoyenne = doy.IdDoyenne
 WHERE scn.jeton = sqlpage.cookie('jeton_session') 
 ;
 

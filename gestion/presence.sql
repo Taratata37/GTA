@@ -1,7 +1,7 @@
 SELECT 'redirect' AS component, '../login' AS link
 WHERE NOT EXISTS (
     SELECT 1
-    FROM session_connexion
+    FROM v_sessions_valides
     WHERE jeton = sqlpage.cookie('jeton_session')
 );
 
@@ -49,8 +49,8 @@ FROM Personne
 NATURAL JOIN Venir
 WHERE date = COALESCE(:jour,date('now'))
 AND (
-    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
 );
 
 select 
@@ -69,8 +69,8 @@ LEFT JOIN (
 WHERE cast(Personne.IdSection as text) = sqlpage.cookie('IdSection')
 AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
 )
 ;
 
@@ -93,7 +93,7 @@ FROM Personne
 NATURAL JOIN Venir
 WHERE date = COALESCE(:jour,date('now'))
 AND (
-    EXISTS ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM session_connexion WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
 )
 ;

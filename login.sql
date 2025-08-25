@@ -1,6 +1,6 @@
 -- login.sql
 SELECT 'redirect' AS component, 'index' AS link
-FROM session_connexion
+FROM v_sessions_valides
 WHERE jeton = sqlpage.cookie('jeton_session');
 
 
