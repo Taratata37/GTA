@@ -85,7 +85,11 @@ select
     NATURAL JOIN PERSONNE
     WHERE IdSection = sqlpage.cookie('IdSection')
     AND IdPromotion = sqlpage.cookie('IdPromotion')
-    AND ( IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )) 
+    AND ( 
+        IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )
+        OR EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
+    )
+
     GROUP BY titre;
 
     
