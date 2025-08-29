@@ -2,12 +2,11 @@ SELECT 'redirect' AS component, 'index' AS link
 WHERE NOT EXISTS (
     SELECT 1
     FROM v_sessions_valides scn
-    LEFT JOIN personne per ON per.idDoyenne = scn.IdDoyenne OR per.idDoyenne IS NULL
-    WHERE (
+    LEFT JOIN personne per ON (per.idDoyenne = scn.IdDoyenne AND per.idPersonne = $id) OR per.idDoyenne IS NULL
+    WHERE  (
         EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
         OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
     )
-    AND per.idPersonne = $id
 );
 
 
