@@ -14,7 +14,7 @@ Attention, le système ne prend qu''un doyenné par fichier
 
 
 select 'form' as component,'action_import_csv.sql' as action;
-select 'fichier_csv' as name, 'file' as type,  'text/csv' as accept;
+select 'fichier_csv' as name, 'file' as type,  'text/csv' as accept, 'Fichier CSV' as label;
 SELECT 'IdSection' as name,
 	'Section' as label,
 	'select' as type,

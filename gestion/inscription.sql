@@ -144,3 +144,5 @@ INNER JOIN v_sessions_valides scn ON scn.idDoyenne = doy.IdDoyenne
 WHERE scn.jeton = sqlpage.cookie('jeton_session') 
 ;
 
+
+SELECT 'text' as component, 'Pour un import en masse, l''utilisateur averti peut utiliser le chargement de fichier [CSV](./charger_fichier.sql)' as contents_md;
