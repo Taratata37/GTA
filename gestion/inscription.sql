@@ -46,7 +46,7 @@ WHERE :nom IS NOT NULL
     AND :sexe IN ('M', 'F')
     AND LENGTH(:nom) > 0
     AND (:sexe = 'F' OR LENGTH(:nomep) = 0 )
-RETURNING 'redirect' AS component, 'detail.sql?id=' || IdPersonne AS link;
+RETURNING 'redirect' AS component, '../detail.sql?id=' || IdPersonne AS link;
 
 select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as properties;
 

@@ -180,7 +180,7 @@ select
 	FROM Personne per
 	WHERE per.IdPersonne = $id;
 select 
-	'Accès espace en ligne' as title,
+	'Accès personnel en ligne' as title,
 	pinPersonne  as description
     ,'/public/detail.sql?id=' || IdPersonne || '&pin='|| pinPersonne as link
 	FROM Personne WHERE IdPersonne = $id;
