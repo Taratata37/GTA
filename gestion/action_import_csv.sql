@@ -61,3 +61,6 @@ WHERE nom IS NOT NULL
     AND sexe IN ('M', 'F')
     AND LENGTH(COALESCE(nom,'')) > 0
     AND (sexe = 'F' OR LENGTH(COALESCE(nomepouse, '')) = 0 ) ;
+
+
+SELECT 'redirect' AS component, '../' AS link
