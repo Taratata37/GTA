@@ -85,6 +85,31 @@ select
 	TRUE as required,
 	:sexe as value,
     '[{"label": "Masculin", "value": "M"}, {"label": "Féminin", "value": "F"}]' as options;
+select * FROM(
+    SELECT 'IdDoyenne' as name,
+	    'Doyenne' as label,
+	    'select' as type,
+        TRUE     as searchable,
+	    FALSE    as multiple,
+	    FALSE as required,
+        json_group_array(
+		    json_object(
+			    'label', doy.NomDoyenne,
+			    'value', doy.IdDoyenne
+		    )
+	    ) as options
+    FROM Doyenne doy
+) t
+WHERE EXISTS ( SELECT '1' FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
+select 
+    'nom_doyenne' as name,
+    'Doyenné' as label,
+    TRUE        as disabled,
+    doy.nomdoyenne as value
+FROM Doyenne doy
+INNER JOIN v_sessions_valides scn ON scn.idDoyenne = doy.IdDoyenne
+WHERE scn.jeton = sqlpage.cookie('jeton_session') 
+;
 SELECT 'courriel' as name,'Courriel' as label,:courriel as value, FALSE as required;
 SELECT 'tel' as name,'Téléphone' as label,:tel as value, FALSE as required;
 SELECT 'IdSection' as name,
@@ -118,31 +143,7 @@ FROM promotion pro;
 SELECT 'rue' as name,'Rue' as label,:rue as value, FALSE as required;
 SELECT 'cp' as name,'Code postal' as label,:cp as value, FALSE as required;
 SELECT 'ville' as name,'Ville' as label,:ville as value, FALSE as required;
-select * FROM(
-    SELECT 'IdDoyenne' as name,
-	    'Doyenne' as label,
-	    'select' as type,
-        TRUE     as searchable,
-	    FALSE    as multiple,
-	    FALSE as required,
-        json_group_array(
-		    json_object(
-			    'label', doy.NomDoyenne,
-			    'value', doy.IdDoyenne
-		    )
-	    ) as options
-    FROM Doyenne doy
-) t
-WHERE EXISTS ( SELECT '1' FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
-select 
-    'nom_doyenne' as name,
-    'Doyenné' as label,
-    TRUE        as disabled,
-    doy.nomdoyenne as value
-FROM Doyenne doy
-INNER JOIN v_sessions_valides scn ON scn.idDoyenne = doy.IdDoyenne
-WHERE scn.jeton = sqlpage.cookie('jeton_session') 
-;
+
 
 
 SELECT 'text' as component, 'Pour un import en masse, l''utilisateur averti peut utiliser le chargement de fichier [CSV](./charger_fichier.sql)' as contents_md;

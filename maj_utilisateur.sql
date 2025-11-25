@@ -61,11 +61,6 @@ select
 SELECT 'nom' as name, Personne.NomPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'nomjf' as name, 'Nom de jeune fille' as label,Personne.NomJfPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne AND Personne.SexePersonne = 'F';
 SELECT 'prenom' as name,'Prénom' as label,Personne.PrenomPersonne as value, TRUE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'IdDoyenne' as name,
 	'Doyenne' as label,
 	'select' as type,
@@ -82,4 +77,13 @@ SELECT 'IdDoyenne' as name,
 FROM Doyenne doy
 LEFT JOIN personne per ON per.IdDoyenne = doy.idDoyenne AND per.IdPersonne = $IdPersonne
 WHERE per.IdPersonne = $IdPersonne OR per.idPersonne is null ;
+SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 
