@@ -80,6 +80,6 @@ SELECT 'IdDoyenne' as name,
 		)
 	) as options
 FROM Doyenne doy
-LEFT JOIN personne per ON per.IdDoyenne = doy.idDoyenne
+LEFT JOIN personne per ON per.IdDoyenne = doy.idDoyenne AND per.IdPersonne = $IdPersonne
 WHERE per.IdPersonne = $IdPersonne OR per.idPersonne is null ;
 
