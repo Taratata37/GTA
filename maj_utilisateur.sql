@@ -81,9 +81,4 @@ SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value
 SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'rue' as name,'Rue' as label,Personne.RuePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'cp' as name,'Code postal' as label,Personne.CpPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'ville' as name,'Ville' as label,Personne.VillePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-
