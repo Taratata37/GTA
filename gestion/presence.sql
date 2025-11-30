@@ -12,7 +12,7 @@ select 'dynamic' as component, sqlpage.run_sql('common_header.sql') as propertie
 select 
     'form'            as component,
 	'Afficher les présences' AS title,
-	'Enregistrer' as validate,
+	'Afficher' as validate,
     'presence.sql' as action;
 SELECT 'jour' as name,
 	'jour de présence' as label,
