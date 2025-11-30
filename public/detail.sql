@@ -167,15 +167,16 @@ select
     'form'            as component,
 	'Accompagnement demandé' AS title,
 	'Enregistrer' as validate,
+    TRUE as auto_submit,
     '#'  as action;
 SELECT 'nom_s[]' as name,
 	'' as label,
 	'select' as type,
     TRUE     as searchable,
      TRUE     as disabled,
+    FALSE as required,
 	TRUE     as multiple,
 	'press ctrl to select multiple values' as description,
-	TRUE as required,
     json_group_array(
 		json_object(
 			'label', Sacrement.NomSacrement,

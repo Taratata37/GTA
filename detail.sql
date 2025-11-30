@@ -125,6 +125,12 @@ WHERE EXISTS (
     WHERE dem.IdPersonne = $id AND sac.NomSacrement = 'Baptême'
 ) ;
 
+select 
+    'modal'                as component,
+    'form_modal_details'   as id,
+    'Modification de la personne' as title,
+    TRUE                   as large,
+    'maj_utilisateur.sql?IdPersonne=' || $id as embed;
 
 
 select 
@@ -204,7 +210,7 @@ SELECT
     'white' as color,
     'Valider la présence ...' as title;
 select 
-    'maj_utilisateur.sql?IdPersonne=' || $id  as link,
+    '#form_modal_details'     as link,
     'blue' as color,
     'Modifier les coordonnées' as title;
 
@@ -213,15 +219,17 @@ select
 select 
     'form'            as component,
 	'Accompagnement demandé' AS title,
+    TRUE as auto_submit,
 	'Enregistrer' as validate,
     'demander.sql?id=' || $id as action;
 SELECT 'nom_s[]' as name,
 	'' as label,
 	'select' as type,
+    TRUE     as disabled,
     TRUE     as searchable,
 	TRUE             as multiple,
 	'press ctrl to select multiple values' as description,
-	TRUE as required,
+	FALSE as required,
     json_group_array(
 		json_object(
 			'label', Sacrement.NomSacrement,
@@ -233,7 +241,17 @@ SELECT 'nom_s[]' as name,
 	left join Demander
     on  Sacrement.IdSacrement = Demander.IdSacrement
     and Demander.idPersonne = $id;
-	
+select 
+    'modal'                as component,
+    'my_embed_form_modal'  as id,
+    'Modification des sacrements demandés' as title,
+    TRUE                   as large,
+    '/f_accompagnement.sql?id=' || $id as embed;
+select 
+    'button' as component;
+select 
+    'Modfier l''accompagnement demandé' as title,
+    '#my_embed_form_modal'     as link;
 
 
 select 

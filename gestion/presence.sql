@@ -87,6 +87,7 @@ select
     NomPersonne  as Nom,
     COALESCE(NomJfPersonne,'') as "Nom de jeune fille",
 	PrenomPersonne as Prénom,
+	CourrielPersonne as courriel,
 	STRFTIME('%d/%m/%Y, %H:%M',date) as "présent le",
 	(SELECT GROUP_CONCAT(COALESCE(Sacrement.NomSacrement,'-'))FROM Demander NATURAL JOIN Sacrement WHERE Personne.IdPersonne = Demander.IdPersonne) as "Sacrements demandés"
 FROM Personne

@@ -144,6 +144,11 @@ SELECT 'rue' as name,'Rue' as label,:rue as value, FALSE as required;
 SELECT 'cp' as name,'Code postal' as label,:cp as value, FALSE as required;
 SELECT 'ville' as name,'Ville' as label,:ville as value, FALSE as required;
 
+select 
+    'modal'                as component,
+    'form_modal_csv'  as id,
+    'Import de masse' as title,
+    TRUE                   as large,
+    './charger_fichier.sql' as embed;
 
-
-SELECT 'text' as component, 'Pour un import en masse, l''utilisateur averti peut utiliser le chargement de fichier [CSV](./charger_fichier.sql)' as contents_md;
+SELECT 'text' as component, 'Pour un import en masse, l''utilisateur averti peut utiliser le chargement de fichier [CSV](#form_modal_csv)' as contents_md;
