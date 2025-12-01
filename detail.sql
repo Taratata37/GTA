@@ -132,6 +132,13 @@ select
     TRUE                   as large,
     'maj_utilisateur.sql?IdPersonne=' || $id as embed;
 
+select 
+    'modal'                as component,
+    'form_modal_validerpresence'   as id,
+    'Pointer la venue de la personne' as title,
+    TRUE                   as large,
+    'f_noter_presence.sql?id=' || $id as embed;
+
 
 select 
     'datagrid' as component;
@@ -206,7 +213,7 @@ WHERE
     $id IS NOT NULL
     AND per.IdPersonne = $id;
 SELECT
-    'noter_presence.sql?id=' || $id as link,
+    '#form_modal_validerpresence' as link,
     'white' as color,
     'Valider la présence ...' as title;
 select 
