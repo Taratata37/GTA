@@ -82,8 +82,8 @@ select
 	'Liste des participants dans la section ' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) as description,
     TRUE    as search;
 select DISTINCT
-    '[' || IiF(length (Personne.NomPersonne) < 1,"-",Personne.NomPersonne) ||'](detail.sql?id=' || Personne.IdPersonne || ')'  as Nom
-    ,IiF(length (Personne.NomPersonne) < 1,'[' || Personne.NomJfPersonne ||'](detail.sql?id=' || Personne.IdPersonne || ')', Personne.NomJfPersonne)  as "Nom de jeune fille"
+    '[' || IiF(length (Personne.NomPersonne) < 1,"-",Personne.NomPersonne) ||'](../detail.sql?id=' || Personne.IdPersonne || ')'  as Nom
+    ,IiF(length (Personne.NomPersonne) < 1,'[' || Personne.NomJfPersonne ||'](../detail.sql?id=' || Personne.IdPersonne || ')', Personne.NomJfPersonne)  as "Nom de jeune fille"
 	,Personne.PrenomPersonne as Prénom
 	,Personne.CourrielPersonne as Courriel
 	,Remplir.CommentaireFormalite as parrain
