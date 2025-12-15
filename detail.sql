@@ -235,7 +235,7 @@ SELECT 'nom_s[]' as name,
     TRUE     as disabled,
     TRUE     as searchable,
 	TRUE             as multiple,
-	'Cliquez sur le bouton ci-après pouur modifier' as description,
+	'Cliquez sur le bouton ci-après pour modifier' as description,
 	FALSE as required,
     json_group_array(
 		json_object(
