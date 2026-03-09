@@ -4,7 +4,7 @@
     <script nonce="{{@csp_nonce}}" src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script nonce="{{@csp_nonce}}">
         new QRCode(document.getElementById("qrcode-{{id}}"), {
-            text: "{{url}}",
+            text: window.location.origin + "{{{url}}}",
             width: {{default width 180}},
             height: {{default height 180}},
             colorDark: "#000000",

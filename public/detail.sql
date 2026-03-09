@@ -194,10 +194,10 @@ SELECT 'nom_s[]' as name,
 
 
 SELECT 
-    'qrcode'   AS component,
+    'qrcode'                    AS component,
     'QR Code d''accès rapide'  AS title,
-    $id        AS id,
-    '/detail.sql?id=' || $id AS url;
+    $id                         AS id,
+    '/detail.sql?id=' || $id    AS url;
 
 
 
