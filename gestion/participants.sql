@@ -61,7 +61,9 @@ select DISTINCT
         LIMIT 1
     ) AS 'Étape de cheminement'
 ,sqlpage.protocol() || '://' || sqlpage.header('host') || '/public/detail.sql?id=' || Personne.IdPersonne || '&pin='|| Personne.pinPersonne as "espace_en_ligne"
+,sper.titre as 'état'
 FROM Personne Personne
+NATURAL JOIN Status_Personne sper
 LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND Formalite.NomFormalite LIKE '%parrain%'
 LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND  forma2.NomFormalite LIKE '%baptême%'
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
