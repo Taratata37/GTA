@@ -60,6 +60,7 @@ select DISTINCT
         )
         LIMIT 1
     ) AS 'Étape de cheminement'
+,sqlpage.protocol() || '://' || sqlpage.header('host') || '/public/detail.sql?id=' || Personne.IdPersonne || '&pin='|| Personne.pinPersonne as "espace_en_ligne"
 FROM Personne Personne
 LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND Formalite.NomFormalite LIKE '%parrain%'
 LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND  forma2.NomFormalite LIKE '%baptême%'
