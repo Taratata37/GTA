@@ -1,4 +1,4 @@
 {
   "database_url": "sqlite://./sqlpage/sqlpage.db?mode=rwc",
-  "content_security_policy": "default-src 'self'; script-src 'self' 'nonce-{NONCE}' https://cdnjs.cloudflare.com 'sha256-BLvmzgZJyQtBMOTU7ou+IL7AhAbt+igwKyA4qar7ptw=' 'sha256-ieoeWczDHkReVBsRBqaal5AFMlBtNjMzgwKvLqi/tSU='; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+  "content_security_policy": "default-src 'self'; script-src 'self' 'nonce-{NONCE}' https://cdnjs.cloudflare.com ; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
 }

@@ -193,22 +193,11 @@ SELECT 'nom_s[]' as name,
 	
 
 
-SELECT 'html' AS component,
-    '<div style="margin: 1rem 0; text-align:center;">
-        <p><strong>Votre QR code d''enregistrement rapide</strong></p>
-        <div id="qrcode" style="display:inline-block;"></div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-        <script>
-            new QRCode(document.getElementById("qrcode"), {
-                text: window.location.origin + "/detail.sql?id=' || $id || '",
-                width: 180,
-                height: 180,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        </script>
-    </div>' AS html;
+SELECT 
+    'qrcode'   AS component,
+    'QR Code d''accès rapide'  AS title,
+    $id        AS id,
+    '/detail.sql?id=' || $id AS url;
 
 
 
