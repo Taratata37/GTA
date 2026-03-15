@@ -293,11 +293,24 @@ FROM Venir
 LEFT JOIN type_evenement ON type_evenement.codeType_evenement = venir.codeType_evenement
 WHERE IdPersonne = $id;
 
+select 
+    'modal'                as component,
+    'modal_changer_promo'  as id,
+    'Modification de la promo' as title,
+    TRUE                   as large,
+    '/gestion/f_changer_promo.sql?id=' || $id as embed;
+select 
+    'button' as component;
+select 
+    'Modfier l''accompagnement demandé' as title,
+    '#my_embed_form_modal'     as link;
 
 
 select 
     'foldable' as component;
 select 
     'Zone de danger' as title,
-    'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! Cliquez [ici](/admin/suppr_utilisateur.sql?IdPersonne=' || $id || ') pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.' as description_md,
+    'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! Cliquez [ici](/admin/suppr_utilisateur.sql?IdPersonne=' || $id || ') pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.
+
+Cliquez [là](#modal_changer_promo) pour changer la personne de promotion. Cela ré-initialisera sa date d''inscription.' as description_md,
     FALSE                as expanded;
