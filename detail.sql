@@ -223,31 +223,29 @@ select
 
 	
 	
-select 
-    'form'            as component,
-	'Accompagnement demandé' AS title,
-    TRUE as auto_submit,
-	'Enregistrer' as validate,
-    'demander.sql?id=' || $id as action;
-SELECT 'nom_s[]' as name,
-	'' as label,
-	'select' as type,
-    TRUE     as disabled,
-    TRUE     as searchable,
-	TRUE             as multiple,
-	'Cliquez sur le bouton ci-après pour modifier' as description,
-	FALSE as required,
-    json_group_array(
-		json_object(
-			'label', Sacrement.NomSacrement,
-			'value', Sacrement.IdSacrement,
-			'selected', Demander.IdSacrement is not null
-		)
-	) as options
-	from Sacrement
-	left join Demander
-    on  Sacrement.IdSacrement = Demander.IdSacrement
-    and Demander.idPersonne = $id;
+SELECT 'datagrid' AS component, 'Accompagnement' AS title;
+
+-- Cas : au moins un sacrement demandé
+SELECT 
+    'Demande enregistrée' AS title,
+    sac.NomSacrement AS description,
+    'arrow-big-right'          AS icon,
+    'blue'          AS color
+FROM Sacrement sac
+INNER JOIN Demander dem ON sac.IdSacrement = dem.IdSacrement AND dem.idPersonne = $id
+
+
+UNION ALL
+
+-- Cas : aucun sacrement demandé
+SELECT
+    '' AS title,
+    'A remplir'                             AS description,
+    'alert-triangle'                            AS icon,
+    'red'                          AS color
+WHERE NOT EXISTS (
+    SELECT 1 FROM Demander WHERE idPersonne = $id
+);
 select 
     'modal'                as component,
     'my_embed_form_modal'  as id,
@@ -258,6 +256,7 @@ select
     'button' as component;
 select 
     'Modfier l''accompagnement demandé' as title,
+'blue' as color,
     '#my_embed_form_modal'     as link;
 
 

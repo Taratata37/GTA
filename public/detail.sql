@@ -24,26 +24,37 @@ WHERE length(etatresume.etat) > 1 and etatresume.IdPersonne = $id;
 
 
 
-SELECT 
-'alert' as component,
-'Pris en compte' as title,
-$majok as description,
-'check' as icon,
-'green' as color
-WHERE $majok is not null;
+SELECT 'modal' AS component, 'modal_rgpd' AS id, 'Politique de confidentialité' AS title,'rgpd.sql'as embed;
+
+
 
 
 Select 
 'text' as component,
 '# Récaputilatif personnel - diocèse de Tours
-Bienvenue sur la page récapitulant l''état actuel de votre dossier.
-La visibilité sur certaines données personnelle est réduite pour des questions de sécurité.
+Bienvenue sur la page récapitulant l''état actuel de votre dossier. 
 
-Conformément à la législation en vigueur, vous disposez d'' un droit d''accès et de rectification de vos données. 
-Veuillez contacter votre responsable de doyenné si vous constatez une erreur dans votre dossier.
+Vous pouvez également consulter les [Infos RGPD](#modal_rgpd)
 
-Vos données personnelles ne seront plus accessible sur cette page à partir de 18 mois d''ancienneté, et seront supprimées rapidement après.
-' as contents_md;
+'  as contents_md;
+
+
+SELECT 'card' AS component, 2 AS columns;
+-- Carte identité
+SELECT 
+    per.PrenomPersonne || ' ' || COALESCE(nullif(per.NomPersonne,''),per.NomJfPersonne) AS title,
+    sec.NomSection || ' — ' || per.VillePersonne AS description,
+    'user' AS icon,
+    'blue' AS color
+FROM Personne per
+LEFT JOIN Section sec ON sec.IdSection = per.IdSection
+WHERE per.IdPersonne = $id;
+select 
+	'Courriel' as title,
+    'mail' AS icon,
+	CourrielPersonne  as description
+	FROM Personne WHERE IdPersonne = $id;
+
 
 select 
     'steps' as component,
@@ -108,26 +119,51 @@ WHERE EXISTS (
 
 
 
+
+
+
+
+-- AVANT : form avec select disabled
+-- APRÈS : datagrid clair
+SELECT 'datagrid' AS component, 'Accompagnement' AS title;
+
+-- Cas : au moins un sacrement demandé
+SELECT 
+    sac.NomSacrement AS title,
+    'Demandé'        AS description,
+    'arrow-big-right'          AS icon,
+    'blue'          AS color
+FROM Sacrement sac
+INNER JOIN Demander dem ON sac.IdSacrement = dem.IdSacrement AND dem.idPersonne = $id
+
+
+UNION ALL
+
+-- Cas : aucun sacrement demandé
+SELECT
+    '' AS title,
+    'A remplir'                             AS description,
+    'alert-triangle'                            AS icon,
+    'red'                          AS color
+WHERE NOT EXISTS (
+    SELECT 1 FROM Demander WHERE idPersonne = $id
+);
+
+
+SELECT 
+    'qrcode'                    AS component,
+    'QR Code d''accès rapide'  AS title,
+    $id                         AS id,
+    '/detail.sql?id=' || $id    AS url;
+
+
 select 
     'datagrid' as component;
-select 
-    'Nom' as title,
-    NomPersonne      as description
-	FROM Personne
-WHERE IdPersonne = $id;
 select 
     'Nom de jeune fille' as title,
     NomJfPersonne  as description
 	FROM Personne
 	WHERE SexePersonne = "F" ANd IdPersonne = $id;
-select 
-	'Prénom' as title,
-	PrenomPersonne  as description
-	FROM Personne WHERE IdPersonne = $id;
-select 
-	'Courriel' as title,
-	CourrielPersonne  as description
-	FROM Personne WHERE IdPersonne = $id;
 select 
     'Téléphone' as title,
      SUBSTR(TelephonePersonne, 1, LENGTH(TelephonePersonne) - 2) || 'XX'  as description
@@ -140,12 +176,6 @@ SELECT
 	FROM Personne
 	WHERE IdPersonne = $id;
 select 
-    'Section' as title,
-    sec.NomSection  as description
-	FROM Personne per
-	INNER JOIN Section sec ON sec.IdSection = per.IdSection
-	WHERE per.IdPersonne = $id;
-select 
     'Promotion' as title,
     pro.NomPromotion  as description
 	FROM Personne per
@@ -157,53 +187,19 @@ select
 	FROM Personne per
 	LEFT JOIN doyenne doy ON doy.IdDoyenne = per.IdDoyenne
 	WHERE per.IdPersonne = $id;
-select 
-    'Adresse' as title,
-    'XXXXX, ' || per.CpPersonne ||  ' '  || per.VillePersonne  as description
-	FROM Personne per
-	WHERE per.IdPersonne = $id;
 	
 
 
-select 
-    'form'            as component,
-	'Accompagnement demandé' AS title,
-	'Enregistrer' as validate,
-    TRUE as auto_submit,
-    '#'  as action;
-SELECT 'nom_s[]' as name,
-	'' as label,
-	'select' as type,
-    TRUE     as searchable,
-     TRUE     as disabled,
-    FALSE as required,
-	TRUE     as multiple,
-	'press ctrl to select multiple values' as description,
-    json_group_array(
-		json_object(
-			'label', Sacrement.NomSacrement,
-			'value', Sacrement.IdSacrement,
-			'selected', Demander.IdSacrement is not null
-		)
-	) as options
-	from Sacrement
-	left join Demander
-    on  Sacrement.IdSacrement = Demander.IdSacrement
-    and Demander.idPersonne = $id;
-	
-
-
-SELECT 
-    'qrcode'                    AS component,
-    'QR Code d''accès rapide'  AS title,
-    $id                         AS id,
-    '/detail.sql?id=' || $id    AS url;
-
+-- Onglets de navigation
+SELECT 'tab' AS component;
+SELECT 'Formalités' AS title, 'clipboard-list' AS icon, ($tab IS NULL OR $tab = 'Formalités')  AS active ,'?tab=Formalités&id=' || $id || '&pin=' || $pin || '#tabs' as link;
+SELECT 'Présences' AS title, 'calendar-check' AS icon,($tab = 'Présences') as active, '?tab=Présences&id=' || $id || '&pin=' || $pin || '#tabs' as link;
 
 
 select 
     'list'             as component,
-    'Formalités' as title;
+    'Formalités' as title
+WHERE $tab IS NULL OR $tab = 'Formalités';
 select 
     Formalite.NomFormalite             as title,
     Remplir.CommentaireFormalite as description,
@@ -212,7 +208,9 @@ select
 FROM Formalite
 INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id )
 LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id )
---WHERE Formalite.IdSection = 2
+WHERE $tab IS NULL OR $tab = 'Formalités' AND EXISTS (
+    SELECT 1 FROM Demander WHERE idPersonne = $id
+);
 
 ;
 
@@ -223,8 +221,11 @@ select
 	TRUE    as striped_rows,
 	'Dates auxquelles la personne était présente' as description,
 	'Personne présente à aucune réunion' as empty_description,
-	TRUE    as small; 
+	TRUE    as small
+WHERE $tab = 'Présences'; 
 SELECT STRFTIME('%d/%m/%Y',DATE) as date,NomType_evenement as 'Evènement'
 FROM Venir
 LEFT JOIN type_evenement ON type_evenement.codeType_evenement = venir.codeType_evenement
-WHERE IdPersonne = $id;
+WHERE IdPersonne = $id AND ($tab = 'Présences');
+SELECT 'html' AS component;
+SELECT '<a name="tabs"></a>' AS html;
