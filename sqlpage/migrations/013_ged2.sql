@@ -1,0 +1,1 @@
+ALTER TABLE Formalite ADD COLUMN Numérisable BOOLEAN DEFAULT 0;

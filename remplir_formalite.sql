@@ -27,7 +27,9 @@ FROM Formalite
 WHERE IdFormalite = $IdFormalite;
 
 SELECT 'commentaire'    AS name, 'Commentaire'          AS label, 'textarea' AS type, FALSE AS required;
-SELECT 'justificatif'   AS name, 'Document justificatif' AS label, 'file'     AS type, FALSE AS required;
+SELECT 'justificatif'   AS name, 'Document justificatif' AS label, 'file'     AS type, FALSE AS required
+FROM Formalite
+WHERE IdFormalite = $IdFormalite AND Numérisable = 1;;
 
 -- Le template injecte uniquement le JS d'interception, après la fermeture du form
-SELECT 'file_compress'  AS component, 'justificatif' AS name;
+SELECT 'file_compress'  AS component, 'justificatif' AS name, 400 AS max_ko;
