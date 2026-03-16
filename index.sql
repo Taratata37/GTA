@@ -109,8 +109,8 @@ select
         OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
     );
 select 
-    '[' || IiF(length (per.NomPersonne) < 1,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
-    ,IiF(length (per.NomPersonne) < 1,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
+    '[' || IiF(NULLIF(per.NomPersonne,'') IS NULL,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
+    ,IiF(NULLIF(per.NomPersonne,'')IS NULL,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
 	,per.PrenomPersonne as Prénom
     ,doy.NomDoyenne as 'Doyenné'
 	,sper.etat as 'état'
