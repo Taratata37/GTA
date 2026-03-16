@@ -32,5 +32,6 @@ SELECT 'nom'         as name, TRUE as required;
 SELECT 'numerisable' as name, 
        'Numérisable (justificatif image accepté)' as label, 
        'switch' as type, 
+ TRUE                       as checked,
        FALSE as required;
 SELECT 'IdSection'   as name, 'hidden' as type, sqlpage.cookie('IdSection') AS value;
