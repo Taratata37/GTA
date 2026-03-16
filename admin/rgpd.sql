@@ -71,13 +71,32 @@ WHERE DateInscriptionPersonne <= date('now', '-3 years')
   AND NomPersonne != 'ANONYME'
 ORDER BY DateInscriptionPersonne ASC;
 
+-- Formulaire de confirmation : uniquement si des personnes sont éligibles
 select
     'form'           as component,
     'Confirmer la purge RGPD' as title,
     'rgpd.sql'       as action,
     'red'            as validate_color,
-    '⚠️ Confirmer la suppression définitive' as validate;
+    '⚠️ Confirmer la suppression définitive' as validate
+WHERE (SELECT COUNT(*) FROM Personne 
+       WHERE DateInscriptionPersonne <= date('now', '-3 years') 
+       AND NomPersonne != 'ANONYME') > 0;
+
 SELECT
     'confirmer'      as name,
     'hidden'         as type,
-    '1'              as value;
+    '1'              as value
+WHERE (SELECT COUNT(*) FROM Personne 
+       WHERE DateInscriptionPersonne <= date('now', '-3 years') 
+       AND NomPersonne != 'ANONYME') > 0;
+
+-- Message si rien à purger
+SELECT
+    'alert'          as component,
+    'Aucune purge nécessaire' as title,
+    'Aucune personne éligible à la purge RGPD pour le moment.' as description,
+    'shield-check'   as icon,
+    'green'          as color
+WHERE (SELECT COUNT(*) FROM Personne 
+       WHERE DateInscriptionPersonne <= date('now', '-3 years') 
+       AND NomPersonne != 'ANONYME') = 0;
