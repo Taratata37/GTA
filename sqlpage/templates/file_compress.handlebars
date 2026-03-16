@@ -73,7 +73,7 @@
       }
 
       info.textContent = 'Compression en cours…';
-      const MAX_BYTES  = 800 * 1024;
+      const MAX_BYTES  = 400 * 1024;
 
       const bitmap = await createImageBitmap(file);
       const { dataUrl, finalBytes } = await compressToLimit(bitmap, MAX_BYTES);
