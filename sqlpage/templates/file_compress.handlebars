@@ -1,0 +1,94 @@
+<script nonce="{{@csp_nonce}}">
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const form   = document.querySelector('form');
+    if (!form) return;
+
+    const name   = "{{name}}";
+    const fileEl = form.querySelector('input[type="file"][name="' + name + '"]');
+    if (!fileEl) return;
+
+    const dataEl      = document.createElement('textarea');
+    dataEl.name       = name + '_data';
+    dataEl.style.display = 'none';
+    form.appendChild(dataEl);
+
+    const info     = document.createElement('small');
+    info.className = 'text-muted d-block mt-1';
+    fileEl.parentNode.appendChild(info);
+
+    // Taille réelle en octets d'un dataURL base64
+    function dataUrlBytes(dataUrl) {
+      const base64 = dataUrl.split(',')[1];
+      // Chaque caractère base64 = 6 bits, donc 4 chars = 3 bytes
+      // On retire le padding '='
+      const padding = (base64.match(/=/g) || []).length;
+      return (base64.length * 3 / 4) - padding;
+    }
+
+    async function compressToLimit(bitmap, maxBytes) {
+      const canvas = document.createElement('canvas');
+      const ctx    = canvas.getContext('2d');
+      let scale    = 1.0;
+
+      while (scale > 0.05) {
+        canvas.width  = Math.round(bitmap.width  * scale);
+        canvas.height = Math.round(bitmap.height * scale);
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+        // Descend la qualité par paliers
+        for (let q = 0.92; q >= 0.10; q -= 0.08) {
+          const dataUrl = canvas.toDataURL('image/jpeg', q);
+          if (dataUrlBytes(dataUrl) <= maxBytes) {
+            return { dataUrl, finalBytes: dataUrlBytes(dataUrl) };
+          }
+        }
+        // Toujours trop grand : réduit les dimensions
+        scale -= 0.10;
+      }
+
+      // Dernier recours : qualité minimale à échelle minimale
+      canvas.width  = Math.round(bitmap.width  * 0.05);
+      canvas.height = Math.round(bitmap.height * 0.05);
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.10);
+      return { dataUrl, finalBytes: dataUrlBytes(dataUrl) };
+    }
+
+    form.addEventListener('submit', async function(e) {
+      const file = fileEl.files[0];
+      if (!file) return;
+
+      e.preventDefault();
+
+      if (!file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          dataEl.value = ev.target.result;
+          fileEl.removeAttribute('name');
+          form.submit();
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      info.textContent = 'Compression en cours…';
+      const MAX_BYTES  = 800 * 1024;
+
+      const bitmap = await createImageBitmap(file);
+      const { dataUrl, finalBytes } = await compressToLimit(bitmap, MAX_BYTES);
+
+      dataEl.value = dataUrl;
+      fileEl.removeAttribute('name');
+
+      const finalKo = Math.round(finalBytes / 1024);
+      const origKo  = Math.round(file.size  / 1024);
+      info.textContent = finalBytes <= MAX_BYTES
+        ? `✅ ${origKo} Ko → ${finalKo} Ko`
+        : `⚠️ ${origKo} Ko → ${finalKo} Ko (limite non atteinte, image trop complexe)`;
+
+      form.submit();
+    });
+  });
+})();
+</script>

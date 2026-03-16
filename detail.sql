@@ -266,16 +266,35 @@ select
     'Formalités' as title;
 select 
     Formalite.NomFormalite             as title,
-    'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE (Remplir.IdPersonne,'-1') as link,
-    Remplir.CommentaireFormalite ||' - Cliquez pour changer l''état'    as description,
-    iif(Remplir.IdPersonne IS NULL, 'red','green')                 as color,
-    iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check')       as icon
+    'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as link,
+    Remplir.CommentaireFormalite || ' - Cliquez pour changer l''état' as description,
+    iif(Remplir.IdPersonne IS NULL, 'red','green')          as color,
+    iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check') as icon
 FROM Formalite
-INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id )
-LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id )
---WHERE Formalite.IdSection = 2
+INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id)
+LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id);
 
-;
+-- Justificatifs : une carte par formalité qui en possède un
+select 'card' as component, 'Justificatifs déposés' as title, 3 as columns
+WHERE EXISTS (
+    SELECT 1 FROM Remplir
+    INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
+    INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
+    WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL
+);
+
+SELECT
+    Formalite.NomFormalite            as title,
+    Remplir.CommentaireFormalite      as description,
+    -- Si c'est une image (data URL image/*) on l'affiche directement
+    CASE WHEN Remplir.Justificatif LIKE 'data:image/%'
+         THEN Remplir.Justificatif
+         ELSE NULL
+    END                               as top_image
+FROM Remplir
+INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
+INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
+WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL;
 
 
 select 
