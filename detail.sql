@@ -299,11 +299,6 @@ select
     'Modification de la promo' as title,
     TRUE                   as large,
     '/gestion/f_changer_promo.sql?id=' || $id as embed;
-select 
-    'button' as component;
-select 
-    'Modfier l''accompagnement demandé' as title,
-    '#my_embed_form_modal'     as link;
 
 
 select 
