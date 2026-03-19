@@ -80,16 +80,15 @@ AND (
 select 
     'table' as component,
 	'Nom' as markdown,
-	'Nom de jeune fille' as markdown,
     TRUE    as sort,
 	'Liste des participants dans la section ' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) as description,
     TRUE    as search;
 select DISTINCT
-    '[' || IiF(length (Personne.NomPersonne) < 1,"-",Personne.NomPersonne) ||'](../detail.sql?id=' || Personne.IdPersonne || ')'  as Nom
-    ,IiF(length (Personne.NomPersonne) < 1,'[' || Personne.NomJfPersonne ||'](../detail.sql?id=' || Personne.IdPersonne || ')', Personne.NomJfPersonne)  as "Nom de jeune fille"
+    '[' || IiF(length (Personne.NomPersonne) < 1,Personne.NomJfPersonne,Personne.NomPersonne) ||'](../detail.sql?id=' || Personne.IdPersonne || ')'  as Nom
 	,Personne.PrenomPersonne as Prénom
 	,Personne.CourrielPersonne as Courriel
 	,Remplir.CommentaireFormalite as parrain
+    ,equ.LibelleEquipe as équipe
 	,remplir2.CommentaireFormalite as "certificat de baptème"
 	 , (
         SELECT libelle
