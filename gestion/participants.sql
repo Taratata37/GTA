@@ -68,13 +68,13 @@ LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND For
 LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND  forma2.NomFormalite LIKE '%baptême%'
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
+LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
 AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+    OR equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )  -- responsable local
 );
-
 
 
 select 
@@ -120,11 +120,13 @@ LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND For
 LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND  forma2.NomFormalite LIKE '%baptême%'
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
+LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
 AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( Personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+    OR equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )  -- responsable local
 );
+
 --AND forma2.IdSection = sqlpage.cookie('IdSection')
 ;

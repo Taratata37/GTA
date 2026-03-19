@@ -15,7 +15,7 @@ NomJfPersonne = UPPER(:nomjf)
 ,RuePersonne = :rue
 ,CpPersonne = :cp
 ,VillePersonne = :ville
-,IdDoyenne = :IdDoyenne
+,IdEquipe        = :IdEquipe
 WHERE IdPersonne = $IdPersonne 
 AND :nom IS NOT NULL
 AND (LENGTH(:nomjf) > 0 OR Personne.SexePersonne = 'M') 
@@ -61,20 +61,22 @@ select
 SELECT 'nom' as name, Personne.NomPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'nomjf' as name, 'Nom de jeune fille' as label,Personne.NomJfPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne AND Personne.SexePersonne = 'F';
 SELECT 'prenom' as name,'Prénom' as label,Personne.PrenomPersonne as value, TRUE as required FROM Personne WHERE IdPersonne = $IdPersonne;
-SELECT 'IdDoyenne' as name,
-	'Doyenne' as label,
-	'select' as type,
-    TRUE     as searchable,
-	FALSE    as multiple,
-	FALSE as required,
+SELECT
+    'IdEquipe'  AS name,
+    'Équipe'    AS label,
+    'select'    AS type,
+    TRUE        AS searchable,
+    FALSE       AS multiple,
+    FALSE       AS required,
     json_group_array(
-		json_object(
-			'label', doy.NomDoyenne,
-			'value', doy.IdDoyenne,
-            'selected', per.IdDoyenne is not null
-		)
-	) as options
-FROM Doyenne doy
+        json_object(
+            'label',    equ.LibelleEquipe || ' (' || doy.NomDoyenne || ')',
+            'value',    equ.IdEquipe,
+            'selected', per.IdEquipe = equ.IdEquipe
+        )
+    ) AS options
+FROM Equipe equ
+JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
 LEFT JOIN personne per ON per.IdDoyenne = doy.idDoyenne AND per.IdPersonne = $IdPersonne
 WHERE per.IdPersonne = $IdPersonne OR per.idPersonne is null ;
 SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;

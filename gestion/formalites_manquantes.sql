@@ -26,18 +26,19 @@ select
 	'Formalités non accomplies dans la section ' || (SELECT sec.NomSection FROM Section sec WHERE sec.IdSection = sqlpage.cookie('IdSection')) as description,
     TRUE    as search;
 select DISTINCT
-    '[' || IiF(length (Personne.NomPersonne) < 1,"-",Personne.NomPersonne) ||'](detail.sql?id=' || Personne.IdPersonne || ')'  as Nom,
-    IiF(length (Personne.NomPersonne) < 1,'[' || Personne.NomJfPersonne ||'](detail.sql?id=' || Personne.IdPersonne || ')', Personne.NomJfPersonne)  as "Nom de jeune fille",
+    '[' || IiF(length (Personne.NomPersonne) < 1,"-",Personne.NomPersonne) ||'](../detail.sql?id=' || Personne.IdPersonne || ')'  as Nom,
+    IiF(length (Personne.NomPersonne) < 1,'[' || Personne.NomJfPersonne ||'](../detail.sql?id=' || Personne.IdPersonne || ')', Personne.NomJfPersonne)  as "Nom de jeune fille",
 	Personne.PrenomPersonne as Prénom,
 	Personne.CourrielPersonne as Courriel,
 	(SELECT GROUP_CONCAT(COALESCE(fo.NomFormalite,'-'))FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL AND fo.IdSection = sqlpage.cookie('IdSection')) as "Formalités restantes"
 FROM Formalite
 CROSS JOIN Personne
+LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Formalite.IdFormalite = Remplir.IdFormalite
 WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection') AND Personne.IdPromotion = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+    OR equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )  -- responsable local
 )
 ;
 
@@ -58,10 +59,11 @@ select DISTINCT
 	(SELECT GROUP_CONCAT(COALESCE(fo.NomFormalite,'-'))FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL AND fo.IdSection = sqlpage.cookie('IdSection')) as "Formalités restantes"
 FROM Formalite
 CROSS JOIN Personne
+LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Formalite.IdFormalite = Remplir.IdFormalite
 WHERE Remplir.IdFormalite IS NULL AND Formalite.IdSection = sqlpage.cookie('IdSection') AND Personne.IdSection = sqlpage.cookie('IdSection') AND Personne.IdPromotion = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( personne.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+    OR equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )  -- responsable local
 )
 ;

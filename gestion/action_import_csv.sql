@@ -32,7 +32,7 @@ INSERT INTO Personne (
     RuePersonne, 
     CpPersonne, 
     VillePersonne, 
-    IdDoyenne,
+    IdEquipe,
     pinPersonne
 )
 SELECT 
@@ -54,7 +54,19 @@ SELECT
     rue,
     cp,
     ville,
-    COAlESCE( ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') ), CAST(:IdDoyenne AS INTEGER)),
+    COALESCE(
+        -- Session avec doyenné : on prend la première équipe du doyenné... 
+        -- ...mais ici l'utilisateur a choisi explicitement son équipe via :IdEquipe
+        CAST(:IdEquipe AS INTEGER),
+        -- Fallback : équipe unique du doyenné de session (si une seule équipe)
+        ( SELECT IdEquipe FROM Equipe
+          WHERE IdDoyenne = (
+              SELECT IdDoyenne FROM v_sessions_valides
+              WHERE jeton = sqlpage.cookie('jeton_session')
+          )
+          LIMIT 1
+        )
+    ),
     substr(random(),5,6) || substr(random(),5,6)
 from csv_import
 WHERE nom IS NOT NULL

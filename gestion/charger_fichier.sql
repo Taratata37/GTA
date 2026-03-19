@@ -4,66 +4,74 @@ WHERE NOT EXISTS (
     FROM v_sessions_valides
     WHERE jeton = sqlpage.cookie('jeton_session')
 );
+
 SELECT 
-    'text' as component,
+    'text' AS component,
     '
 # Chargement de fichier 
-Attention, le système ne prend qu''un doyenné par fichier
-	' as contents_md;
+Attention, le système ne prend qu''une équipe par fichier
+    ' AS contents_md;
 
+SELECT 'form' AS component, 'action_import_csv.sql' AS action;
 
+SELECT 'fichier_csv' AS name, 'file' AS type, 'text/csv' AS accept, 'Fichier CSV' AS label;
 
-select 'form' as component,'action_import_csv.sql' as action;
-select 'fichier_csv' as name, 'file' as type,  'text/csv' as accept, 'Fichier CSV' as label;
-SELECT 'IdSection' as name,
-	'Section' as label,
-	'select' as type,
-    TRUE     as searchable,
-	FALSE    as multiple,
-	TRUE as required,
+SELECT
+    'IdSection' AS name,
+    'Section'   AS label,
+    'select'    AS type,
+    TRUE        AS searchable,
+    FALSE       AS multiple,
+    TRUE        AS required,
     json_group_array(
-		json_object(
-			'label', sec.NomSection,
-			'value', sec.IdSection,
-            'selected',sec.IdSection =sqlpage.cookie('IdSection')
-		)
-	) as options
+        json_object(
+            'label',    sec.NomSection,
+            'value',    sec.IdSection,
+            'selected', sec.IdSection = sqlpage.cookie('IdSection')
+        )
+    ) AS options
 FROM section sec;
-SELECT 'IdPromotion' as name,
-	'Promotion' as label,
-	'select' as type,
-    TRUE     as searchable,
-	FALSE    as multiple,
-	TRUE as required,
+
+SELECT
+    'IdPromotion' AS name,
+    'Promotion'   AS label,
+    'select'      AS type,
+    TRUE          AS searchable,
+    FALSE         AS multiple,
+    TRUE          AS required,
     json_group_array(
-		json_object(
-			'label', pro.NomPromotion,
-			'value', pro.IdPromotion,
-            'selected',pro.IdPromotion =sqlpage.cookie('IdPromotion')
-		)
-	) as options
-FROM promotion pro; 
-select * FROM(
-    SELECT 'IdDoyenne' as name,
-	    'Doyenné' as label,
-	    'select' as type,
-        TRUE     as searchable,
-	    FALSE    as multiple,
-	    FALSE as required,
+        json_object(
+            'label',    pro.NomPromotion,
+            'value',    pro.IdPromotion,
+            'selected', pro.IdPromotion = sqlpage.cookie('IdPromotion')
+        )
+    ) AS options
+FROM promotion pro;
+
+-- Champ Équipe : select filtré sur le doyenné de la session si défini, toutes équipes sinon (admin)
+SELECT * FROM (
+    SELECT
+        'IdEquipe'  AS name,
+        'Équipe'    AS label,
+        'select'    AS type,
+        TRUE        AS searchable,
+        FALSE       AS multiple,
+        TRUE        AS required,
         json_group_array(
-		    json_object(
-			    'label', doy.NomDoyenne,
-			    'value', doy.IdDoyenne
-		    )
-	    ) as options
-    FROM Doyenne doy
-) t
-WHERE EXISTS ( SELECT '1' FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
-select 
-    'nom_doyenne' as name,
-    'Doyenné' as label,
-    TRUE        as disabled,
-    doy.nomdoyenne as value
-FROM Doyenne doy
-INNER JOIN v_sessions_valides scn ON scn.idDoyenne = doy.IdDoyenne
-WHERE scn.jeton = sqlpage.cookie('jeton_session') 
+            json_object(
+                'label', CASE
+                    WHEN scn.IdDoyenne IS NULL
+                    THEN equ.LibelleEquipe || ' (' || doy.NomDoyenne || ')'
+                    ELSE equ.LibelleEquipe
+                END,
+                'value', equ.IdEquipe
+            )
+        ) AS options
+    FROM Equipe equ
+    JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
+    INNER JOIN v_sessions_valides scn ON (
+        scn.IdDoyenne IS NULL
+        OR scn.IdDoyenne = equ.IdDoyenne
+    )
+    WHERE scn.jeton = sqlpage.cookie('jeton_session')
+) t;

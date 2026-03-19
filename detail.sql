@@ -2,10 +2,12 @@ SELECT 'redirect' AS component, 'index' AS link
 WHERE NOT EXISTS (
     SELECT 1
     FROM v_sessions_valides scn
-    LEFT JOIN personne per ON (per.idDoyenne = scn.IdDoyenne AND per.idPersonne = $id) OR per.idDoyenne IS NULL
-    WHERE  (
-        EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-        OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    LEFT JOIN Personne per ON per.IdPersonne = $id
+    LEFT JOIN Equipe equ ON equ.IdEquipe = per.IdEquipe
+    WHERE jeton = sqlpage.cookie('jeton_session')
+    AND (
+        scn.IdDoyenne IS NULL                        -- admin : accès à tout
+        OR equ.IdDoyenne = scn.IdDoyenne             -- responsable local : même doyenné
     )
 );
 
@@ -181,12 +183,19 @@ select
 	FROM Personne per
 	INNER JOIN promotion pro ON pro.IdPromotion = per.IdPromotion
 	WHERE per.IdPersonne = $id;
-select 
-    'Doyenné' as title,
-    doy.NomDoyenne  as description
-	FROM Personne per
-	LEFT JOIN doyenne doy ON doy.IdDoyenne = per.IdDoyenne
-	WHERE per.IdPersonne = $id;
+SELECT
+    'Doyenné' AS title,
+    doy.NomDoyenne AS description
+FROM Personne per
+LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
+LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
+WHERE per.IdPersonne = $id;
+SELECT
+    'equipe' AS title,
+    equ.LibelleEquipe AS description
+FROM Personne per
+LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
+WHERE per.IdPersonne = $id;
 select 
     'Adresse' as title,
     per.RuePersonne ||  ' - '  || per.CpPersonne ||  ' '  || per.VillePersonne  as description

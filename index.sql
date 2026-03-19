@@ -72,25 +72,26 @@ Cliquez sur un nom pour accéder à la fiche de la personne.
 	WHERE sqlpage.cookie('IdSection') IS NOT NULL;;
 	
 	
-select 
-    'chart'   as component,
-    'états des inscriptions' as title,
-    'pie'     as type,
-    FALSE      as labels
-    WHERE sqlpage.cookie('IdSection') IS NOT NULL;
-select 
-    titre as label,
-    count(*)  as value
-    FROM Status_Personne
-    NATURAL JOIN PERSONNE
-    WHERE IdSection = sqlpage.cookie('IdSection')
-    AND IdPromotion = sqlpage.cookie('IdPromotion')
-    AND ( 
-        IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )
-        OR EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    )
+SELECT 
+    'chart'                  AS component,
+    'états des inscriptions' AS title,
+    'pie'                    AS type,
+    FALSE                    AS labels
+WHERE sqlpage.cookie('IdSection') IS NOT NULL;
 
-    GROUP BY titre;
+SELECT 
+    titre    AS label,
+    count(*) AS value
+FROM Status_Personne
+NATURAL JOIN Personne
+LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
+WHERE IdSection    = sqlpage.cookie('IdSection')
+AND   IdPromotion  = sqlpage.cookie('IdPromotion')
+AND (
+    equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )
+    OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+)
+GROUP BY titre;
 
     
 select 
@@ -102,12 +103,13 @@ select
 	'état' as icon,
     TRUE    as search 
     from Personne per
+    LEFT JOIN Equipe equ ON equ.IdEquipe = per.IdEquipe
     WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
     AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion')
     AND (
-        EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-        OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
-    );
+        equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )
+        OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+);
 select 
     '[' || IiF(NULLIF(per.NomPersonne,'') IS NULL,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
     ,IiF(NULLIF(per.NomPersonne,'')IS NULL,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
@@ -115,13 +117,14 @@ select
     ,doy.NomDoyenne as 'Doyenné'
 	,sper.etat as 'état'
 FROM Personne per
-LEFT JOIN doyenne doy on doy.IdDoyenne = per.IdDoyenne
+LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
+LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
 NATURAL JOIN Status_Personne sper
-WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
-AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion')
+WHERE CAST(per.IdSection   AS TEXT) = sqlpage.cookie('IdSection')
+AND   CAST(per.IdPromotion AS TEXT) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') and IdDoyenne IS NULL  ) -- admin
-    OR ( per.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )) -- responsable local
+    EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+    OR equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )  -- responsable local
 )
 ;
 

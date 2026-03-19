@@ -18,7 +18,7 @@ INSERT INTO Personne (
     RuePersonne, 
     CpPersonne, 
     VillePersonne, 
-    IdDoyenne,
+    IdEquipe,
     pinPersonne
 )
 SELECT 
@@ -40,7 +40,7 @@ SELECT
     :rue,
     :cp,
     :ville,
-    COAlESCE( ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') ), CAST(:IdDoyenne AS INTEGER)),
+    CAST(:IdEquipe AS INTEGER),
     substr(random(),5,6) || substr(random(),5,6)
 WHERE :nom IS NOT NULL
     AND :sexe IN ('M', 'F')
@@ -85,31 +85,25 @@ select
 	TRUE as required,
 	:sexe as value,
     '[{"label": "Masculin", "value": "M"}, {"label": "Féminin", "value": "F"}]' as options;
-select * FROM(
-    SELECT 'IdDoyenne' as name,
-	    'Doyenne' as label,
-	    'select' as type,
-        TRUE     as searchable,
-	    FALSE    as multiple,
-	    FALSE as required,
-        json_group_array(
-		    json_object(
-			    'label', doy.NomDoyenne,
-			    'value', doy.IdDoyenne
-		    )
-	    ) as options
-    FROM Doyenne doy
-) t
-WHERE EXISTS ( SELECT '1' FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session')  and IdDoyenne IS NULL );
-select 
-    'nom_doyenne' as name,
-    'Doyenné' as label,
-    TRUE        as disabled,
-    doy.nomdoyenne as value
-FROM Doyenne doy
-INNER JOIN v_sessions_valides scn ON scn.idDoyenne = doy.IdDoyenne
-WHERE scn.jeton = sqlpage.cookie('jeton_session') 
-;
+SELECT
+    'IdEquipe'  AS name,
+    'Équipe'    AS label,
+    'select'    AS type,
+    TRUE        AS searchable,
+    FALSE       AS multiple,
+    TRUE        AS required,
+    json_group_array(
+        json_object(
+            'label', equ.LibelleEquipe,
+            'value', equ.IdEquipe
+        )
+    ) AS options
+FROM Equipe equ
+INNER JOIN v_sessions_valides scn ON (
+    scn.IdDoyenne IS NULL          -- session sans doyenné : toutes les équipes
+    OR scn.IdDoyenne = equ.IdDoyenne  -- session avec doyenné : équipes filtrées
+)
+WHERE scn.jeton = sqlpage.cookie('jeton_session');
 SELECT 'courriel' as name,'Courriel' as label,:courriel as value, FALSE as required;
 SELECT 'tel' as name,'Téléphone' as label,:tel as value, FALSE as required;
 SELECT 'IdSection' as name,

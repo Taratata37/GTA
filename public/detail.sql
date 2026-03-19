@@ -43,11 +43,12 @@ SELECT 'card' AS component, 2 AS columns;
 -- Carte identité
 SELECT 
     per.PrenomPersonne || ' ' || COALESCE(nullif(per.NomPersonne,''),per.NomJfPersonne) AS title,
-    sec.NomSection || ' — ' || per.VillePersonne AS description,
+    sec.NomSection || ' — ' || equ.LibelleEquipe AS description,
     'user' AS icon,
     'blue' AS color
 FROM Personne per
 LEFT JOIN Section sec ON sec.IdSection = per.IdSection
+LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
 WHERE per.IdPersonne = $id;
 select 
 	'Courriel' as title,
@@ -181,14 +182,19 @@ select
 	FROM Personne per
 	INNER JOIN promotion pro ON pro.IdPromotion = per.IdPromotion
 	WHERE per.IdPersonne = $id;
-select 
-    'Doyenné' as title,
-    doy.NomDoyenne  as description
-	FROM Personne per
-	LEFT JOIN doyenne doy ON doy.IdDoyenne = per.IdDoyenne
+SELECT
+    'Doyenné' AS title,
+    doy.NomDoyenne AS description
+FROM Personne per
+LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
+LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
 	WHERE per.IdPersonne = $id;
-	
-
+SELECT
+    'Ville de résidence' AS title,
+	per.VillePersonne AS description
+FROM Personne per
+LEFT JOIN Section sec ON sec.IdSection = per.IdSection
+WHERE per.IdPersonne = $id;
 
 -- Onglets de navigation
 SELECT 'tab' AS component;
