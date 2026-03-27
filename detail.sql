@@ -233,6 +233,7 @@ SELECT
 select 
     '#form_modal_details'     as link,
     'blue' as color,
+    'Modifier les coordonnées'           as tooltip,
     'edit' as icon
     --,'Modifier les coordonnées' as title
 ;
