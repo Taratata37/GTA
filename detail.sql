@@ -316,7 +316,7 @@ SELECT
 FROM Remplir
 INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
 INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
-WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL;
+WHERE Remplir.IdPersonne = $id AND NULLIF(Remplir.Justificatif,'') IS NOT NULL;
 
 
 select 
