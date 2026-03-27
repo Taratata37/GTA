@@ -35,7 +35,7 @@ select DISTINCT
 	,Personne.PrenomPersonne as Prénom
 	,Personne.CourrielPersonne as Courriel
 	,Remplir.CommentaireFormalite as parrain
-,remplir2.CommentaireFormalite as "certificat de baptème"
+    ,remplir2.CommentaireFormalite as "certificat de baptème"
 	 , (
         SELECT libelle
         FROM (
@@ -60,8 +60,10 @@ select DISTINCT
         )
         LIMIT 1
     ) AS 'Étape de cheminement'
-,sqlpage.protocol() || '://' || sqlpage.header('host') || '/public/detail.sql?id=' || Personne.IdPersonne || '&pin='|| Personne.pinPersonne as "espace_en_ligne"
-,sper.titre as 'état'
+    ,equ.LibelleEquipe as équipe
+    ,sper.titre as 'état'
+    ,sqlpage.protocol() || '://' || sqlpage.header('host') || '/public/detail.sql?id=' || Personne.IdPersonne || '&pin='|| Personne.pinPersonne as "espace_en_ligne"
+    
 FROM Personne Personne
 NATURAL JOIN Status_Personne sper
 LEFT JOIN Formalite ON Formalite.IdSection = sqlpage.cookie('IdSection') AND Formalite.NomFormalite LIKE '%parrain%'

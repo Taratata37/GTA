@@ -1,3 +1,11 @@
+SELECT 'redirect' AS component, '../index' AS link
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM v_sessions_valides
+    WHERE jeton = sqlpage.cookie('jeton_session')
+      AND IdDoyenne IS NULL
+);
+
 select 'form' as component, 'Définir mot de passe' as validate;
 SELECT 'IdDoyenne' as name,
 	'Doyenné' as label,
