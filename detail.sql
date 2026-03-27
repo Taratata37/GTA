@@ -214,6 +214,7 @@ select
 SELECT
     'noter_presence.sql?id=' || $id || '&codeevt=RECOL' as link,
     'success' as color,
+    'check' as icon,
     'Valider la présence ce jour' as title,
     COALESCE((SELECT 1 FROM Venir ven WHERE ven.IdPersonne = per.IdPersonne AND ven.date = date('now') LIMIT 1), FALSE) as disabled
 FROM
@@ -221,16 +222,27 @@ FROM
 WHERE
     $id IS NOT NULL
     AND per.IdPersonne = $id;
+
+
+
 SELECT
     '#form_modal_validerpresence' as link,
-    'white' as color,
+    'lime' as color,
+
     'Valider la présence ...' as title;
 select 
     '#form_modal_details'     as link,
     'blue' as color,
-    'Modifier les coordonnées' as title;
+    'edit' as icon
+    --,'Modifier les coordonnées' as title
+;
 
-	
+select 
+    '/detail_print.sql?id=' || $id                 as link,
+    TRUE                as narrow,
+    'printer' as icon,
+    'dark'           as color,
+    'Imprimer'           as tooltip;	
 	
 SELECT 'datagrid' AS component, 'Accompagnement' AS title;
 
@@ -265,7 +277,8 @@ select
     'button' as component;
 select 
     'Modfier l''accompagnement demandé' as title,
-'blue' as color,
+    'blue' as color,
+    'edit' as icon,
     '#my_embed_form_modal'     as link;
 
 
@@ -315,7 +328,7 @@ select
 	TRUE    as small; 
 SELECT STRFTIME('%d/%m/%Y',DATE) as date
 , NomType_evenement as 'Evènement'
-,'[supprimer](supprimer_presence.sql?IdPersonne=' || $id || '&date=' || date || '&codeevt=' || Venir.codeType_evenement || ')' as supprimer
+,'[🗑️ supprimer](supprimer_presence.sql?IdPersonne=' || $id || '&date=' || date || '&codeevt=' || Venir.codeType_evenement || ')' as supprimer
 FROM Venir
 LEFT JOIN type_evenement ON type_evenement.codeType_evenement = venir.codeType_evenement
 WHERE IdPersonne = $id;
