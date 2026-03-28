@@ -80,7 +80,7 @@ SELECT
 WHERE sqlpage.cookie('IdSection') IS NOT NULL;
 
 SELECT 
-    titre    AS label,
+    COALESCE(NULLIF(titre,''),'Prêt' )   AS label,
     count(*) AS value
 FROM Status_Personne
 NATURAL JOIN Personne
@@ -88,7 +88,7 @@ LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
 WHERE IdSection    = sqlpage.cookie('IdSection')
 AND   IdPromotion  = sqlpage.cookie('IdPromotion')
 AND (
-    equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )
+    equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )
     OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
 )
 GROUP BY titre;
@@ -107,8 +107,8 @@ select
     WHERE cast(per.IdSection as text) = sqlpage.cookie('IdSection')
     AND cast(per.IdPromotion as text) = sqlpage.cookie('IdPromotion')
     AND (
-        equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_connexion') )
-        OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
+        equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )
+        OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND idDoyenne IS NULL ) -- admin
 );
 select 
     '[' || IiF(NULLIF(per.NomPersonne,'') IS NULL,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom

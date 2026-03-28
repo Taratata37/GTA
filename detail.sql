@@ -22,35 +22,6 @@ etatresume.description as description,
 etatresume.couleur as color,
 etatresume.etat as icon
 FROM Status_Personne etatresume
-/*
-FROM(  
-		select
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"alert-triangle", -- Le dossier initial est incomplet
-				iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-					iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","file-report"),
-					"user-search")
-		) as etat 
-		,
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"Dossier incomplet", -- Le dossier initial est incomplet
-			iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-					iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","Formalités incomplètes"),
-					"Information")
-		) as titre
-		,
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"Il manque un moyen de contact ou un sacrement demandé pour compléter le dossier de ce recommençant", -- Le dossier initial est incomplet
-			iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-				iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","Il reste des formalités à remplir par ce recommençant"),
-					"Cette personne n'est pour l'instant venue à aucune rencontre diocésaine")
-		) as description
-		,
-		iif((SELECT COUNT(*) from Demander WHERE Demander.IdPersonne = Personne.IdPersonne) = 0 OR LENGTH(Personne.CourrielPersonne) + LENGTH(Personne.TelephonePersonne) < 1,"orange", -- Le dossier initial est incomplet
-			iif((SELECT COUNT(*) from Venir WHERE Venir.IdPersonne = Personne.IdPersonne) > 0,
-				iif( (SELECT COUNT(fo.NomFormalite)FROM Formalite fo LEFT JOIN Remplir rem ON (fo.IdFormalite = rem.IdFormalite AND rem.IdPersonne = Personne.IdPersonne )WHERE rem.IdPersonne IS NULL) = 0 ,"","blue"),
-					"dark-grey")
-		) as couleur
-		FROM Personne Where Personne.IdPersonne = $id
-
-) etatresume*/
 WHERE length(etatresume.etat) > 1 and etatresume.IdPersonne = $id;
 
 
@@ -342,11 +313,23 @@ select
     '/gestion/f_changer_promo.sql?id=' || $id as embed;
 
 
-select 
-    'foldable' as component;
-select 
-    'Zone de danger' as title,
-    'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! Cliquez [ici](/admin/suppr_utilisateur.sql?IdPersonne=' || $id || ') pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.
+select 'foldable' as component;
 
-Cliquez [là](#modal_changer_promo) pour changer la personne de promotion. Cela ré-initialisera sa date d''inscription.' as description_md,
-    FALSE                as expanded;
+select
+    'Zone de danger' as title,
+    'Cliquez [🧭là](#modal_changer_promo) pour changer la personne de promotion. '
+    || 'Cela ré-initialisera sa date d''inscription.'
+    || CASE
+        WHEN EXISTS (
+            SELECT 1 FROM v_sessions_valides
+            WHERE jeton = sqlpage.cookie('jeton_session')
+              AND IdDoyenne IS NULL
+        )
+        THEN char(10) || char(10)
+        || 'L''opération suivante est irrémédiable. Aucune confirmation ne sera demandée ! '
+        || 'Cliquez [🗑️ici](/admin/suppr_utilisateur.sql?IdPersonne=' || $id || ') '
+        || 'pour retirer définitivement l''utilisateur du système ainsi que toutes ses dépendances.'
+        ELSE ''
+       END                  as description_md,
+    FALSE                   as expanded
+;

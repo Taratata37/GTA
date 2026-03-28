@@ -50,10 +50,11 @@ FROM Personne per
 LEFT JOIN Section sec ON sec.IdSection = per.IdSection
 LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
 WHERE per.IdPersonne = $id;
+
 select 
 	'Courriel' as title,
     'mail' AS icon,
-	CourrielPersonne  as description
+	COALESCE(nullif(CourrielPersonne,''),'—')  as description
 	FROM Personne WHERE IdPersonne = $id;
 
 
@@ -120,44 +121,6 @@ WHERE EXISTS (
 
 
 
-
-
-
-
--- AVANT : form avec select disabled
--- APRÈS : datagrid clair
-SELECT 'datagrid' AS component, 'Accompagnement' AS title;
-
--- Cas : au moins un sacrement demandé
-SELECT 
-    sac.NomSacrement AS title,
-    'Demandé'        AS description,
-    'arrow-big-right'          AS icon,
-    'blue'          AS color
-FROM Sacrement sac
-INNER JOIN Demander dem ON sac.IdSacrement = dem.IdSacrement AND dem.idPersonne = $id
-
-
-UNION ALL
-
--- Cas : aucun sacrement demandé
-SELECT
-    '' AS title,
-    'A remplir'                             AS description,
-    'alert-triangle'                            AS icon,
-    'red'                          AS color
-WHERE NOT EXISTS (
-    SELECT 1 FROM Demander WHERE idPersonne = $id
-);
-
-
-SELECT 
-    'qrcode'                    AS component,
-    'QR Code d''accès rapide'  AS title,
-    $id                         AS id,
-    '/detail.sql?id=' || $id    AS url;
-
-
 select 
     'datagrid' as component;
 select 
@@ -170,12 +133,12 @@ select
      SUBSTR(TelephonePersonne, 1, LENGTH(TelephonePersonne) - 2) || 'XX'  as description
 	FROM Personne
 	WHERE IdPersonne = $id;
-SELECT
+/*SELECT
     'Ancienneté en mois' AS title,
     CAST((STRFTIME('%m', 'now') - STRFTIME('%m', DateInscriptionPersonne) +
           (STRFTIME('%Y', 'now') - STRFTIME('%Y', DateInscriptionPersonne)) * 12) AS INTEGER) AS description
 	FROM Personne
-	WHERE IdPersonne = $id;
+	WHERE IdPersonne = $id;*/
 select 
     'Promotion' as title,
     pro.NomPromotion  as description
@@ -195,6 +158,37 @@ SELECT
 FROM Personne per
 LEFT JOIN Section sec ON sec.IdSection = per.IdSection
 WHERE per.IdPersonne = $id;
+
+
+
+-- AVANT : form avec select disabled
+-- APRÈS : datagrid clair
+SELECT 'datagrid' AS component, '🧭 Accompagnement demandé' AS title;
+
+-- Cas : au moins un sacrement demandé
+SELECT 
+    '' AS title,
+    sac.NomSacrement        AS description,
+    'arrow-big-right'          AS icon,
+    'blue'          AS color
+FROM Sacrement sac
+INNER JOIN Demander dem ON sac.IdSacrement = dem.IdSacrement AND dem.idPersonne = $id
+
+
+UNION ALL
+
+-- Cas : aucun sacrement demandé
+SELECT
+    '' AS title,
+    'A remplir'                             AS description,
+    'alert-triangle'                            AS icon,
+    'red'                          AS color
+WHERE NOT EXISTS (
+    SELECT 1 FROM Demander WHERE idPersonne = $id
+);
+
+
+
 
 -- Onglets de navigation
 SELECT 'tab' AS component;
@@ -233,5 +227,13 @@ SELECT STRFTIME('%d/%m/%Y',DATE) as date,NomType_evenement as 'Evènement'
 FROM Venir
 LEFT JOIN type_evenement ON type_evenement.codeType_evenement = venir.codeType_evenement
 WHERE IdPersonne = $id AND ($tab = 'Présences');
+
 SELECT 'html' AS component;
 SELECT '<a name="tabs"></a>' AS html;
+
+
+SELECT 
+    'qrcode'                    AS component,
+    'QR Code d''accès rapide'  AS title,
+    $id                         AS id,
+    '/detail.sql?id=' || $id    AS url;
