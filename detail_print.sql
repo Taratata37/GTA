@@ -371,9 +371,9 @@ SELECT 'html' AS component,
     || '<span class="dot ' || CASE WHEN Remplir.IdPersonne IS NULL THEN 'nok' ELSE 'ok' END || '"></span>'
     || Formalite.NomFormalite
     || CASE WHEN NULLIF(Remplir.CommentaireFormalite,'') IS NOT NULL
-            THEN '<span class="comment">' || Remplir.CommentaireFormalite || '</span>'
-            WHEN Remplir.IdPersonne IS NULL THEN '<span class="comment">' ||  'A remplir' || '</span>'
-            ELSE '<span class="comment">' ||  'Valide' || '</span>' END
+            THEN '<span class="comment">✔ ' || Remplir.CommentaireFormalite || '</span>'
+            WHEN Remplir.IdPersonne IS NULL THEN '<span class="comment">' ||  '❌ A remplir' || '</span>'
+            ELSE '<span class="comment">' ||  '✔ Valide' || '</span>' END
     || '</div>',
     ''
   ) ||
