@@ -157,7 +157,7 @@ SELECT 'html' AS component, '
     }
 
     /* ── Formalités ── */
-    .formalites { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .formalites { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .formalite-item {
       display: flex;
       align-items: center;
@@ -172,7 +172,15 @@ SELECT 'html' AS component, '
       flex-shrink: 0;
     }
     .dot.ok  { background: #2a9d5c; }
-    .dot.nok { background: #d9534f; }
+    .dot.nok {
+      width: 0;
+      height: 0;
+      background: none;
+      border-radius: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 9px solid #d9534f;
+    }
     .formalite-item .comment { font-size: 7.5pt; color: var(--muted); margin-left: auto; }
 
     /* ── Étapes catéchuménat ── */
@@ -242,6 +250,16 @@ SELECT 'html' AS component, '
       .section-coordonnees::before {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+      }
+      .dot.ok, .dot.nok {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      .tag {
+        background: none !important;
+        color: var(--bleu) !important;
+        border: 1.5px solid var(--bleu) !important;
+        font-weight: 700 !important;
       }
     }
 
@@ -403,9 +421,9 @@ SELECT 'html' AS component,
     || '<span class="dot ' || CASE WHEN Remplir.IdPersonne IS NULL THEN 'nok' ELSE 'ok' END || '"></span>'
     || Formalite.NomFormalite
     || CASE WHEN NULLIF(Remplir.CommentaireFormalite,'') IS NOT NULL
-            THEN '<span class="comment">✔ ' || Remplir.CommentaireFormalite || '</span>'
+            THEN '<span class="comment">' || Remplir.CommentaireFormalite || '</span>'
             WHEN Remplir.IdPersonne IS NULL THEN '<span class="comment">' ||  '❌ A remplir' || '</span>'
-            ELSE '<span class="comment">' ||  '✔ Valide' || '</span>' END
+            ELSE '' END
     || '</div>',
     ''
   ) ||
