@@ -216,11 +216,11 @@ select
     'dark'           as color,
     'Imprimer'           as tooltip;	
 	
-SELECT 'datagrid' AS component, 'Accompagnement' AS title;
+SELECT 'datagrid' AS component, '🫴 Accompagnement' AS title;
 
 -- Cas : au moins un sacrement demandé
 SELECT 
-    'Demande enregistrée' AS title,
+    '' AS title,
     sac.NomSacrement AS description,
     'arrow-big-right'          AS icon,
     'blue'          AS color
@@ -256,7 +256,7 @@ select
 
 select 
     'list'             as component,
-    'Formalités' as title;
+    '🗃️ Formalités' as title;
 select 
     Formalite.NomFormalite             as title,
     'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as link,
@@ -268,12 +268,12 @@ INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.Id
 LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id);
 
 -- Justificatifs : une carte par formalité qui en possède un
-select 'card' as component, 'Justificatifs déposés' as title, 3 as columns
+select 'card' as component, '📄 Justificatifs déposés' as title, 3 as columns
 WHERE EXISTS (
     SELECT 1 FROM Remplir
     INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
     INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
-    WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL
+    WHERE Remplir.IdPersonne = $id AND NULLIF(Remplir.Justificatif,'') IS NOT NULL
 );
 
 SELECT
@@ -291,6 +291,7 @@ WHERE Remplir.IdPersonne = $id AND NULLIF(Remplir.Justificatif,'') IS NOT NULL;
 
 
 select 
+    
 	'table' as component,
 	TRUE    as hover,
 	TRUE    as striped_rows,
