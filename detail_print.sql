@@ -237,7 +237,39 @@ SELECT 'html' AS component, '
       section { break-inside: avoid; }
       .etapes { break-inside: avoid; }
       a { text-decoration: none; color: inherit; }
+
+      .section-coordonnees,
+      .section-coordonnees::before {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
     }
+
+    /* ── Guilloche fond coordonnées ── */
+.section-coordonnees {
+  position: relative;
+  padding: 10px 12px 12px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.section-coordonnees::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg,  transparent, transparent 7px, rgba(26,58,92,0.055) 7px, rgba(26,58,92,0.055) 8px),
+    repeating-linear-gradient(-45deg, transparent, transparent 7px, rgba(184,150,62,0.055) 7px, rgba(184,150,62,0.055) 8px),
+    repeating-linear-gradient(0deg,   transparent, transparent 15px, rgba(26,58,92,0.03) 15px, rgba(26,58,92,0.03) 16px),
+    repeating-linear-gradient(90deg,  transparent, transparent 15px, rgba(184,150,62,0.03) 15px, rgba(184,150,62,0.03) 16px);
+  border: 1px solid rgba(184,150,62,0.25);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.section-coordonnees .grid,
+.section-coordonnees h2 {
+  position: relative;
+  z-index: 1;
+}
   </style>
 
 </head>
@@ -289,7 +321,7 @@ WHERE IdPersonne = $id AND length(etat) > 1;
 
 -- 5. Coordonnées
 SELECT 'html' AS component,
-'<section>
+'<section class="section-coordonnees">
   <h2>Coordonnées</h2>
   <div class="grid">
     <div class="item"><label>Courriel</label><span>' || COALESCE(NULLIF(CourrielPersonne,''),'—') || '</span></div>
@@ -418,7 +450,7 @@ WHERE EXISTS (
     SELECT 1 FROM Remplir
     INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
     INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
-    WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL
+    WHERE Remplir.IdPersonne = $id AND NULLIF(Remplir.Justificatif,'') IS NOT NULL
 );
 
 -- Une image par justificatif
@@ -438,7 +470,7 @@ SELECT 'html' AS component,
 FROM Remplir
 INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
 INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
-WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL;
+WHERE Remplir.IdPersonne = $id AND NULLIF(Remplir.Justificatif,'') IS NOT NULL;
 
 -- Fermeture du div annexe
 SELECT 'html' AS component, '</div>' AS html
@@ -446,13 +478,13 @@ WHERE EXISTS (
     SELECT 1 FROM Remplir
     INNER JOIN Formalite ON Formalite.IdFormalite = Remplir.IdFormalite
     INNER JOIN Personne  ON Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id
-    WHERE Remplir.IdPersonne = $id AND Remplir.Justificatif IS NOT NULL
+    WHERE Remplir.IdPersonne = $id AND NULLIF(Remplir.Justificatif,'') IS NOT NULL
 );
 
 -- 11. Pied de page + fermeture HTML
 SELECT 'html' AS component,
 '  <footer>
-    <span>Document confidentiel – usage interne – diffusion restreinte </span>
+    <span>Document confidentiel – diffusion restreinte </span>
     <span>Généré depuis GTA</span>
   </footer>
 </div><!-- .page -->
