@@ -115,7 +115,7 @@ SELECT 'html' AS component, '
 
     .destinataire .details {
       margin-top: 6px;
-      font-size: 9pt;
+      font-size: 12pt;
       color: #555;
       line-height: 1.7;
       letter-spacing: .02em;
