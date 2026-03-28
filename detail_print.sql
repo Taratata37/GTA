@@ -295,7 +295,7 @@ SELECT 'html' AS component,
     <div class="item"><label>Courriel</label><span>' || COALESCE(NULLIF(CourrielPersonne,''),'—') || '</span></div>
     <div class="item"><label>Téléphone</label><span>' || COALESCE(NULLIF(TelephonePersonne,''),'—') || '</span></div>
     <div class="item"><label>Adresse</label><span>' ||
-      COALESCE(NULLIF(RuePersonne,'') || ', ' || CpPersonne || ' ' || VillePersonne, '—') ||
+      COALESCE(RuePersonne || ', ' || CpPersonne || ' ' || NULLIF(VillePersonne,''), '—') ||
     '</span></div>
     <div class="item"><label>Section</label><span>' || COALESCE(NULLIF(sec.NomSection,''),'—') || '</span></div>
     <div class="item"><label>Promotion</label><span>' || COALESCE(NULLIF(pro.NomPromotion,''),'—') || '</span></div>
