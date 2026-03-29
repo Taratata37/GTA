@@ -10,6 +10,7 @@ SELECT
     '
 # Chargement de fichier 
 Attention, le système ne prend qu''une équipe par fichier
+La première ligne doit être "nom,nomepouse,sexe,prenom,tel,courriel,rue,cp,ville"
     ' AS contents_md;
 
 SELECT 'form' AS component, 'action_import_csv.sql' AS action;
