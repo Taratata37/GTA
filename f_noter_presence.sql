@@ -1,14 +1,14 @@
 
 select 
     'form'            as component,
-	'Enregistrer participation à un évènement' AS title,
+	'Enregistrer la participation à un évènement' AS title,
     'noter_presence.sql?id=' || $id as action;
 SELECT 'prenom' as name,'Prénom' as label, FALSE as required,TRUE as disabled,
 PrenomPersonne as value
 FROM personne
 WHERE IdPersonne = $id;
 SELECT 'nom' as name,'Nom' as label, FALSE as required,TRUE as disabled,
-NomPersonne as value
+COALESCE(NULLIF(NomPersonne,''),NomJFPersonne) as value
 FROM personne
 WHERE IdPersonne = $id;
 select 
