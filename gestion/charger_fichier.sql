@@ -9,7 +9,7 @@ SELECT
     'text' AS component,
     '
 # Chargement de fichier 
-Attention, le système ne prend qu''une équipe par fichier
+Attention, le système ne prend qu''une équipe par fichier.
 La première ligne doit être "nom,nomepouse,sexe,prenom,tel,courriel,rue,cp,ville"
     ' AS contents_md;
 
