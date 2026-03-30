@@ -70,10 +70,11 @@ SELECT
     FALSE       AS required,
     json_group_array(
         json_object(
-            'label',    equ.LibelleEquipe || ' (' || doy.NomDoyenne || ')',
+            'label',   '[' || doy.NomDoyenne || '] ' || equ.LibelleEquipe,
             'value',    equ.IdEquipe,
             'selected', per.IdEquipe = equ.IdEquipe
         )
+    ORDER BY doy.NomDoyenne ASC, equ.LibelleEquipe ASC
     ) AS options
 FROM Equipe equ
 JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
