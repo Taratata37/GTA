@@ -97,6 +97,7 @@ SELECT
             'label', equ.LibelleEquipe,
             'value', equ.IdEquipe
         )
+        ORDER BY  equ.LibelleEquipe ASC
     ) AS options
 FROM Equipe equ
 INNER JOIN v_sessions_valides scn ON (
