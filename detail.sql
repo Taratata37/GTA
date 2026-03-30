@@ -258,7 +258,7 @@ select
 select 
     'modal'                as component,
     'modale_formalite_' || Formalite.IdFormalite  as id,
-    'Modification des sacrements demandés' as title,
+    'Modification de formalités accomplies' as title,
     TRUE                   as large,
     'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as embed
 FROM Formalite
