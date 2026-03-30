@@ -254,12 +254,26 @@ select
     '#my_embed_form_modal'     as link;
 
 
+
+select 
+    'modal'                as component,
+    'modale_formalite_' || Formalite.IdFormalite  as id,
+    'Modification des sacrements demandés' as title,
+    TRUE                   as large,
+    'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as embed
+FROM Formalite
+INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id)
+LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id);
+;
+
+
 select 
     'list'             as component,
     '🗃️ Formalités' as title;
 select 
     Formalite.NomFormalite             as title,
-    'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as link,
+    --'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as link,
+    '#modale_formalite_' || Formalite.IdFormalite  as link,
     Remplir.CommentaireFormalite || ' - Cliquez pour changer l''état' as description,
     iif(Remplir.IdPersonne IS NULL, 'red','green')          as color,
     iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check') as icon
