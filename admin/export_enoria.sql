@@ -1,4 +1,5 @@
 SELECT 'csv' AS component,
+';'                as separator,
        'export_enoria.csv' AS filename;
 
 SELECT
