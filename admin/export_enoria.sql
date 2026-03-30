@@ -22,7 +22,7 @@ SELECT
 
     -- Contact
     p.CourrielPersonne                          AS adulteMailPerso,
-    p.TelephonePersonne                         AS adulteTelMobilePerso,
+    REPLACE(p.TelephonePersonne, ' ', '')       AS adulteTelMobilePerso,
 
     -- Adresse postale (champ unique RuePersonne → PostaleRue)
     p.RuePersonne                               AS PostaleRue,
