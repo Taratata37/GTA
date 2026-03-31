@@ -152,8 +152,15 @@ SELECT 'html' AS component, '
       border-radius: 20px;
       font-weight: 500;
     }
-    .tag.absent {
-      background: #d9534f;
+
+    .tag-absent {
+        //background: #d9534f;
+
+        color: #d9534f;
+        font-style: italic;
+        font-size: 9pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
     /* ── Formalités ── */
@@ -166,6 +173,7 @@ SELECT 'html' AS component, '
       padding: 4px 0;
       border-bottom: 1px solid var(--border);
     }
+
     .formalite-item .dot {
       width: 9px; height: 9px;
       border-radius: 50%;
@@ -345,7 +353,7 @@ SELECT 'html' AS component,
     <div class="item"><label>Courriel</label><span>' || COALESCE(NULLIF(CourrielPersonne,''),'—') || '</span></div>
     <div class="item"><label>Téléphone</label><span>' || COALESCE(NULLIF(TelephonePersonne,''),'—') || '</span></div>
     <div class="item"><label>Adresse</label><span>' ||
-      COALESCE(RuePersonne || ', <br>' || CpPersonne || ' ' || NULLIF(VillePersonne,''), '—') ||
+      COALESCE(RuePersonne || '<br>' || CpPersonne || ' ' || NULLIF(VillePersonne,''), '—') ||
     '</span></div>
     <div class="item"><label>Section</label><span>' || COALESCE(NULLIF(sec.NomSection,''),'—') || '</span></div>
     <div class="item"><label>Promotion</label><span>' || COALESCE(NULLIF(pro.NomPromotion,''),'—') || '</span></div>
@@ -370,7 +378,7 @@ SELECT 'html' AS component,
     (SELECT GROUP_CONCAT('<span class="tag">' || sac.NomSacrement || '</span>', ' ')
      FROM Sacrement sac
      INNER JOIN Demander dem ON sac.IdSacrement = dem.IdSacrement AND dem.idPersonne = $id),
-    '<span class="tag absent">Aucun accompagnement demandé</span>'
+    '<span class="tag-absent">Aucun accompagnement demandé</span>'
   ) ||
   '</div>
 </section>' AS html;
