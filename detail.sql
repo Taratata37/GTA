@@ -272,8 +272,10 @@ select
     '🗃️ Formalités' as title;
 select 
     Formalite.NomFormalite             as title,
-    --'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1') as link,
-    '#modale_formalite_' || Formalite.IdFormalite  as link,
+    CASE WHEN NULLIF(Remplir.IdPersonne,'') IS NULL
+        THEN 'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1')
+        ELSE '#modale_formalite_' || Formalite.IdFormalite  
+    END as link,
     Remplir.CommentaireFormalite || ' - Cliquez pour changer l''état' as description,
     iif(Remplir.IdPersonne IS NULL, 'red','green')          as color,
     iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check') as icon
