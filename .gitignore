@@ -1,3 +1,4 @@
-sqlpage.bin
+*.bin
 sqlpage/sqlpage.db
 logo.png
+*.sh

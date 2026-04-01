@@ -37,6 +37,7 @@ SELECT 'html' AS component, '
       --texte:    #1c1c1c;
       --muted:    #666;
       --border:   #d0cfc8;
+      --vert:     #2a9d5c;
     }
 
     /* ── Reset global ── */
@@ -85,6 +86,7 @@ SELECT 'html' AS component, '
       max-width: 820px;
       margin-left: auto;
       margin-right: auto;
+      position: relative; /* pour le tampon en position absolue */
     }
 
     /* ── En-tête ── */
@@ -107,6 +109,17 @@ SELECT 'html' AS component, '
       color: var(--muted);
       text-align: right;
       line-height: 1.6;
+    }
+    header .meta .promotion-badge {
+      display: inline-block;
+      background: var(--bleu);
+      color: #fff;
+      font-size: 8pt;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 20px;
+      letter-spacing: .04em;
+      margin-bottom: 4px;
     }
 
     /* ── Sections ── */
@@ -154,8 +167,6 @@ SELECT 'html' AS component, '
     }
 
     .tag-absent {
-        //background: #d9534f;
-
         color: #d9534f;
         font-style: italic;
         font-size: 9pt;
@@ -228,6 +239,46 @@ SELECT 'html' AS component, '
     }
     .alerte strong { display: block; margin-bottom: 2px; }
 
+    /* ── Tampon "Candidat prêt" ── */
+    .tampon-pret {
+      position: fixed;
+      bottom: 32px;
+      right: 36px;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3.5px solid var(--vert);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--vert);
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 0 0 2px rgba(42,157,92,0.15), 0 4px 16px rgba(42,157,92,0.18);
+      transform: rotate(-8deg);
+      z-index: 100;
+      pointer-events: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .tampon-pret svg {
+      width: 28px; height: 28px;
+      stroke: var(--vert);
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .tampon-pret span {
+      font-family: ''EB Garamond'', serif;
+      font-size: 10.5pt;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      letter-spacing: .03em;
+    }
+
     /* ── Pied de page ── */
     footer {
       margin-top: 32px;
@@ -268,6 +319,17 @@ SELECT 'html' AS component, '
         color: var(--bleu) !important;
         border: 1.5px solid var(--bleu) !important;
         font-weight: 700 !important;
+      }
+      .tampon-pret {
+        position: fixed;
+        bottom: 18mm;
+        right: 16mm;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .promotion-badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }
 
@@ -312,30 +374,52 @@ SELECT 'html' AS component, '
 
 
 -- 3. En-tête de fiche
+-- MODIF 1 : la promotion est affichée dans le bloc .meta, au-dessus de la date d'édition
+-- La requête est volontairement éclatée en plusieurs SELECT pour éviter
+-- les guillemets doublés imbriqués dans les CASE WHEN (syntaxe rejetée par SQLPage).
+
+-- 3a. Ouverture header + nom
 SELECT 'html' AS component,
-'<header>
-  <div>
-    <h1>' || PrenomPersonne || ' ' || NomPersonne ||
-    CASE WHEN SexePersonne = 'F' AND NomJfPersonne IS NOT NULL
-         THEN ' <span style="font-size:13pt;font-weight:400;font-style:italic;">(née ' || NomJfPersonne || ')</span>'
-         ELSE '' END ||
-    '</h1>
-    <div style="color:var(--muted);font-size:9pt;margin-top:4px;">
-      Personne inscrite le ' || STRFTIME('%d/%m/%Y', DateInscriptionPersonne) || '
-    </div>
-  </div>
-  <img src="/logo.png"
-       alt="Diocèse de Tours"
-       style="height:72px;width:auto;object-fit:contain;"
-       onerror="this.style.display=''none''"
-  >
-  <div class="meta">
-    Fiche éditée le ' || STRFTIME('%d/%m/%Y', 'now') || '<br>
-    Référence : #' || IdPersonne || '
-  </div>
-</header>' AS html
+  '<header><div><h1>'
+  || PrenomPersonne || ' ' || NomPersonne
+  || '</h1>'
+  || '<div style="color:var(--muted);font-size:9pt;margin-top:4px;">Personne inscrite le '
+  || STRFTIME('%d/%m/%Y', DateInscriptionPersonne)
+  || '</div></div>'
+  || '<img src="/logo.png" alt="Diocèse de Tours"'
+  || ' style="height:72px;width:auto;object-fit:contain;"'
+  || ' onerror="this.style.display=''none''">'
+  AS html
 FROM Personne
 WHERE IdPersonne = $id;
+
+-- 3b. Nom de jeune fille (seulement si femme avec NomJf renseigné)
+SELECT 'html' AS component,
+  '<script>
+    (function(){
+      var h1 = document.querySelector("header h1");
+      if(h1) h1.innerHTML += '' <span style="font-size:13pt;font-weight:400;font-style:italic;">(née ''
+        + ' || COALESCE(QUOTE(NomJfPersonne), 'NULL') || '
+        + '')</span>'';
+    })();
+  </script>' AS html
+FROM Personne
+WHERE IdPersonne = $id AND SexePersonne = 'F' AND NULLIF(NomJfPersonne, '') IS NOT NULL;
+
+-- 3c. Bloc meta : badge promotion (si renseignée) + date édition + référence
+SELECT 'html' AS component,
+  '<div class="meta">'
+  || COALESCE(
+       '<span class="promotion-badge">' || pro.NomPromotion || '</span><br>',
+       ''
+     )
+  || 'Fiche éditée le ' || STRFTIME('%d/%m/%Y', 'now') || '<br>'
+  || 'Référence : #' || per.IdPersonne
+  || '</div></header>'
+  AS html
+FROM Personne per
+LEFT JOIN PROMOTION pro ON pro.IdPromotion = per.IdPromotion AND NULLIF(pro.NomPromotion, '') IS NOT NULL
+WHERE per.IdPersonne = $id;
 
 
 -- 4. Alerte statut (si pertinente)
@@ -346,6 +430,7 @@ WHERE IdPersonne = $id AND length(etat) > 1;
 
 
 -- 5. Coordonnées
+-- MODIF 1 (suite) : la Promotion est retirée de la grille coordonnées
 SELECT 'html' AS component,
 '<section class="section-coordonnees">
   <h2>Coordonnées</h2>
@@ -356,14 +441,12 @@ SELECT 'html' AS component,
       COALESCE(RuePersonne || '<br>' || CpPersonne || ' ' || NULLIF(VillePersonne,''), '—') ||
     '</span></div>
     <div class="item"><label>Section</label><span>' || COALESCE(NULLIF(sec.NomSection,''),'—') || '</span></div>
-    <div class="item"><label>Promotion</label><span>' || COALESCE(NULLIF(pro.NomPromotion,''),'—') || '</span></div>
     <div class="item"><label>Doyenné</label><span>' || COALESCE(NULLIF(doy.NomDoyenne,''),'—') || '</span></div>
     <div class="item"><label>Équipe</label><span>' || COALESCE(NULLIF(equ.LibelleEquipe,''),'—') || '</span></div>
   </div>
 </section>' AS html
 FROM Personne per
-LEFT JOIN Section   sec ON sec.IdSection   = per.IdSection
-LEFT JOIN Promotion pro ON pro.IdPromotion = per.IdPromotion
+LEFT JOIN SECTION   sec ON sec.IdSection   = per.IdSection
 LEFT JOIN Equipe    equ ON equ.IdEquipe    = per.IdEquipe
 LEFT JOIN Doyenne   doy ON doy.IdDoyenne   = equ.IdDoyenne
 WHERE per.IdPersonne = $id;
@@ -463,6 +546,24 @@ WHERE NOT EXISTS (SELECT 1 FROM Venir WHERE IdPersonne = $id);
 
 -- Fermeture
 SELECT 'html' AS component, '</div></section>' AS html;
+
+
+-- MODIF 2 : Tampon "Candidat prêt" – affiché uniquement si toutes les formalités sont remplies
+-- (aucune formalité de la section de la personne ne manque dans Remplir)
+SELECT 'html' AS component,
+'<div class="tampon-pret">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>
+  <span>Candidat<br>prêt</span>
+</div>' AS html
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Formalite fo
+    INNER JOIN Personne per ON per.IdSection = fo.IdSection AND per.IdPersonne = $id
+    LEFT JOIN  Remplir  rem ON rem.IdFormalite = fo.IdFormalite AND rem.IdPersonne = $id
+    WHERE rem.IdPersonne IS NULL
+);
 
 
 -- 10. Annexe : justificatifs (saut de page avant, une image par formalité)
