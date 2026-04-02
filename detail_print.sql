@@ -239,44 +239,60 @@ SELECT 'html' AS component, '
     }
     .alerte strong { display: block; margin-bottom: 2px; }
 
-    /* ── Tampon "Candidat prêt" ── */
+    /* ── Tampon "Candidat prêt" – style rectangle notarial ── */
     .tampon-pret {
       position: fixed;
       bottom: 32px;
       right: 36px;
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      border: 3.5px solid var(--vert);
+      width: 152px;
+      height: 82px;
+      border: 2.5px solid var(--vert);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 1px;
       color: var(--vert);
-      background: rgba(255,255,255,0.92);
-      box-shadow: 0 0 0 2px rgba(42,157,92,0.15), 0 4px 16px rgba(42,157,92,0.18);
-      transform: rotate(-8deg);
+      background: rgba(255,255,255,0.93);
+      transform: rotate(-5deg);
       z-index: 100;
       pointer-events: none;
+      padding: 10px 12px;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    .tampon-pret svg {
-      width: 28px; height: 28px;
-      stroke: var(--vert);
-      fill: none;
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .tampon-pret::before,
+    .tampon-pret::after {
+      content: "";
+      position: absolute;
+      left: 5px; right: 5px;
+      height: 1.5px;
+      background: var(--vert);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
-    .tampon-pret span {
+    .tampon-pret::before { top: 6px; }
+    .tampon-pret::after  { bottom: 6px; }
+    .tampon-pret .t-top {
       font-family: ''EB Garamond'', serif;
-      font-size: 10.5pt;
+      font-size: 7pt;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 400;
+    }
+    .tampon-pret .t-main {
+      font-family: ''EB Garamond'', serif;
+      font-size: 15pt;
       font-weight: 700;
-      text-align: center;
-      line-height: 1.2;
-      letter-spacing: .03em;
+      letter-spacing: .06em;
+      line-height: 1.1;
+    }
+    .tampon-pret .t-sub {
+      font-family: ''DM Sans'', sans-serif;
+      font-size: 6.5pt;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 400;
     }
 
     /* ── Pied de page ── */
@@ -378,33 +394,25 @@ SELECT 'html' AS component, '
 -- La requête est volontairement éclatée en plusieurs SELECT pour éviter
 -- les guillemets doublés imbriqués dans les CASE WHEN (syntaxe rejetée par SQLPage).
 
--- 3a. Ouverture header + nom
+-- 3a. Ouverture header + nom (NomJf intégré via IIF, sans guillemets imbriqués dans CASE WHEN)
 SELECT 'html' AS component,
   '<header><div><h1>'
   || PrenomPersonne || ' ' || NomPersonne
+  || IIF(
+       SexePersonne = 'F' AND NULLIF(NomJfPersonne, '') IS NOT NULL,
+       ' <span style="font-size:13pt;font-weight:400;font-style:italic;">(n&#233;e ' || NomJfPersonne || ')</span>',
+       ''
+     )
   || '</h1>'
   || '<div style="color:var(--muted);font-size:9pt;margin-top:4px;">Personne inscrite le '
   || STRFTIME('%d/%m/%Y', DateInscriptionPersonne)
   || '</div></div>'
-  || '<img src="/logo.png" alt="Diocèse de Tours"'
+  || '<img src="/logo.png" alt="Di&#244;c&#232;se de Tours"'
   || ' style="height:72px;width:auto;object-fit:contain;"'
   || ' onerror="this.style.display=''none''">'
   AS html
 FROM Personne
 WHERE IdPersonne = $id;
-
--- 3b. Nom de jeune fille (seulement si femme avec NomJf renseigné)
-SELECT 'html' AS component,
-  '<script>
-    (function(){
-      var h1 = document.querySelector("header h1");
-      if(h1) h1.innerHTML += '' <span style="font-size:13pt;font-weight:400;font-style:italic;">(née ''
-        + ' || COALESCE(QUOTE(NomJfPersonne), 'NULL') || '
-        + '')</span>'';
-    })();
-  </script>' AS html
-FROM Personne
-WHERE IdPersonne = $id AND SexePersonne = 'F' AND NULLIF(NomJfPersonne, '') IS NOT NULL;
 
 -- 3c. Bloc meta : badge promotion (si renseignée) + date édition + référence
 SELECT 'html' AS component,
@@ -549,13 +557,12 @@ SELECT 'html' AS component, '</div></section>' AS html;
 
 
 -- MODIF 2 : Tampon "Candidat prêt" – affiché uniquement si toutes les formalités sont remplies
--- (aucune formalité de la section de la personne ne manque dans Remplir)
+-- Style : rectangle notarial avec double filet et typographie Garamond
 SELECT 'html' AS component,
 '<div class="tampon-pret">
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
-  <span>Candidat<br>prêt</span>
+  <span class="t-top">Dossier</span>
+  <span class="t-main">COMPLET</span>
+  <span class="t-sub">candidat pr&#234;t</span>
 </div>' AS html
 WHERE NOT EXISTS (
     SELECT 1
