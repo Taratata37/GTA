@@ -76,9 +76,9 @@ SELECT
         )
     ORDER BY doy.NomDoyenne ASC, equ.LibelleEquipe ASC
     ) AS options
-FROM Equipe equ
-JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
-LEFT JOIN personne per ON per.IdDoyenne = doy.idDoyenne AND per.IdPersonne = $IdPersonne
+FROM Doyenne doy
+LEFT JOIN Equipe equ  ON doy.IdDoyenne = equ.IdDoyenne
+LEFT JOIN personne per ON per.IdEquipe = equ.IdEquipe
 WHERE per.IdPersonne = $IdPersonne OR per.idPersonne is null ;
 SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
