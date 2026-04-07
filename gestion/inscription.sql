@@ -39,7 +39,7 @@ SELECT
     CAST(:IdPromotion AS INTEGER),
     :rue,
     :cp,
-    :ville,
+    REPLACE(UPPER(:ville),'6','-'),
     CAST(:IdEquipe AS INTEGER),
     substr(random(),5,6) || substr(random(),5,6)
 WHERE :nom IS NOT NULL

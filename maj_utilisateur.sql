@@ -14,7 +14,7 @@ CourrielPersonne = :courriel,
 NomJfPersonne = UPPER(:nomjf)
 ,RuePersonne = :rue
 ,CpPersonne = :cp
-,VillePersonne = :ville
+,VillePersonne =  REPLACE(UPPER(:ville),'6','-')
 ,IdEquipe        = :IdEquipe
 WHERE IdPersonne = $IdPersonne 
 AND :nom IS NOT NULL
