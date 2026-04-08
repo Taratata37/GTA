@@ -76,8 +76,8 @@ SELECT
         )
     ORDER BY doy.NomDoyenne ASC, equ.LibelleEquipe ASC
     ) AS options
-FROM Doyenne doy
-LEFT JOIN Equipe equ  ON doy.IdDoyenne = equ.IdDoyenne
+FROM Equipe equ
+LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
 LEFT JOIN personne per ON per.IdEquipe = equ.IdEquipe
 WHERE per.IdPersonne = $IdPersonne OR per.idPersonne is null ;
 SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
