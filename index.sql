@@ -116,6 +116,7 @@ select
 	,per.PrenomPersonne as Prénom
     ,doy.NomDoyenne as 'Doyenné'
 	,sper.etat as 'état'
+    ,NULLIF(sper.couleur, '') AS _sqlpage_color
 FROM Personne per
 LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
 LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
