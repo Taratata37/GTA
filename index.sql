@@ -110,13 +110,20 @@ select
         equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )
         OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND idDoyenne IS NULL ) -- admin
 );
-select 
-    '[' || IiF(NULLIF(per.NomPersonne,'') IS NULL,"-",per.NomPersonne) ||'](detail.sql?id=' || per.IdPersonne || ')'  as Nom
-    ,IiF(NULLIF(per.NomPersonne,'')IS NULL,'[' || per.NomJfPersonne ||'](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne)  as "Nom de jeune fille"
-	,per.PrenomPersonne as Prénom
-    ,doy.NomDoyenne as 'Doyenné'
-	,sper.etat as 'état'
-    ,NULLIF(sper.couleur, '') AS _sqlpage_color
+SELECT 
+    '[' || IIF(NULLIF(per.NomPersonne,'') IS NULL, '-', per.NomPersonne) || '](detail.sql?id=' || per.IdPersonne || ')' AS Nom,
+    IIF(NULLIF(per.NomPersonne,'') IS NULL, '[' || per.NomJfPersonne || '](detail.sql?id=' || per.IdPersonne || ')', per.NomJfPersonne) AS "Nom de jeune fille",
+    per.PrenomPersonne AS Prénom,
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM v_sessions_valides 
+            WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL
+        )
+        THEN doy.NomDoyenne       -- admin → affiche le doyenné
+        ELSE equ.LibelleEquipe    -- responsable local → affiche l'équipe
+    END AS '{}',
+    sper.etat AS 'état',
+    NULLIF(sper.couleur, '') AS _sqlpage_color
 FROM Personne per
 LEFT JOIN Equipe  equ ON equ.IdEquipe  = per.IdEquipe
 LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
@@ -124,8 +131,14 @@ NATURAL JOIN Status_Personne sper
 WHERE CAST(per.IdSection   AS TEXT) = sqlpage.cookie('IdSection')
 AND   CAST(per.IdPromotion AS TEXT) = sqlpage.cookie('IdPromotion')
 AND (
-    EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
-    OR equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )  -- responsable local
+    EXISTS (
+        SELECT 1 FROM v_sessions_valides 
+        WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL
+    ) -- admin
+    OR equ.IdDoyenne = (
+        SELECT IdDoyenne FROM v_sessions_valides 
+        WHERE jeton = sqlpage.cookie('jeton_session')
+    ) -- responsable local
 )
 ;
 
