@@ -79,6 +79,7 @@ SELECT
 FROM Equipe equ
 LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
 LEFT JOIN personne per ON per.IdEquipe = equ.IdEquipe AND per.IdPersonne = $IdPersonne 
+WHERE equ.IdSection = sqlpage.cookie('IdSection') ;
 ;
 SELECT 'courriel' as name,'Courriel' as label,Personne.CourrielPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'telephone' as name,'Téléphone' as label,Personne.TelephonePersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;

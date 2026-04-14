@@ -104,7 +104,8 @@ INNER JOIN v_sessions_valides scn ON (
     scn.IdDoyenne IS NULL          -- session sans doyenné : toutes les équipes
     OR scn.IdDoyenne = equ.IdDoyenne  -- session avec doyenné : équipes filtrées
 )
-WHERE scn.jeton = sqlpage.cookie('jeton_session');
+WHERE scn.jeton = sqlpage.cookie('jeton_session') 
+AND equ.IdSection = sqlpage.cookie('IdSection') ;
 SELECT 'courriel' as name,'Courriel' as label,:courriel as value, FALSE as required;
 SELECT 'tel' as name,'Téléphone' as label,:tel as value, FALSE as required;
 SELECT 'IdSection' as name,

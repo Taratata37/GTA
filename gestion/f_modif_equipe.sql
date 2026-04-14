@@ -4,34 +4,32 @@ WHERE NOT EXISTS (
     FROM v_sessions_valides
     WHERE jeton = sqlpage.cookie('jeton_session')
 );
-
 -- =============================================
 -- TRAITEMENT : Modifier une équipe
 -- =============================================
 UPDATE Equipe
 SET
     LibelleEquipe = :libelle,
-    IdDoyenne     = COAlESCE( ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') ), CAST(:IdDoyenne AS INTEGER))
+    IdSection     = CAST(:IdSection AS INTEGER),
+    IdDoyenne     = COALESCE(
+        (SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session')),
+        CAST(:IdDoyenne AS INTEGER)
+    )
 WHERE IdEquipe = CAST($IdEquipe AS INTEGER)
-    AND  :libelle is not null
+AND  :libelle IS NOT NULL
 RETURNING 'redirect' AS component, './equipes.sql' AS link;
-
-
 -- =============================================
 -- FORMULAIRE : Modifier une équipe (pré-rempli)
 -- =============================================
 SELECT 'dynamic' AS component, sqlpage.run_sql('common_header.sql') AS properties;
-
 SELECT
     'text' AS component,
     '# Modifier une équipe' AS contents_md;
-
 SELECT
     'form'                AS component,
     'Modifier une équipe' AS title,
-    'f_modif_equipe.sql?IdEquipe=' || $IdEquipe  AS action;
-
-
+    'f_modif_equipe.sql?IdEquipe=' || $IdEquipe AS action;
+-- Nom de l'équipe
 SELECT
     'libelle'          AS name,
     'Nom de l''équipe' AS label,
@@ -39,7 +37,21 @@ SELECT
     TRUE               AS required
 FROM Equipe equ
 WHERE equ.IdEquipe = CAST($IdEquipe AS INTEGER);
-
+-- Section
+SELECT
+    'IdSection' AS name,
+    'Section'   AS label,
+    'select'    AS type,
+    TRUE        AS required,
+    json_group_array(
+        json_object(
+            'label',    sec.NomSection,
+            'value',    sec.IdSection,
+            'selected', sec.IdSection = equ.IdSection
+        )
+    ) AS options
+FROM SECTION sec
+JOIN Equipe equ ON equ.IdEquipe = CAST($IdEquipe AS INTEGER);
 -- Doyenné : select pour l'admin
 SELECT * FROM (
     SELECT
@@ -64,7 +76,6 @@ WHERE EXISTS (
     WHERE jeton = sqlpage.cookie('jeton_session')
     AND IdDoyenne IS NULL
 );
-
 -- Doyenné : champ grisé pour le non-admin
 SELECT * FROM (
     SELECT

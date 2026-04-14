@@ -85,8 +85,8 @@ SELECT
 FROM Status_Personne
 NATURAL JOIN Personne
 LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
-WHERE IdSection    = sqlpage.cookie('IdSection')
-AND   IdPromotion  = sqlpage.cookie('IdPromotion')
+WHERE Personne.IdSection    = sqlpage.cookie('IdSection')
+AND   Personne.IdPromotion  = sqlpage.cookie('IdPromotion')
 AND (
     equ.IdDoyenne = ( SELECT IdDoyenne FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') )
     OR EXISTS ( SELECT 1 FROM v_sessions_valides WHERE jeton = sqlpage.cookie('jeton_session') AND IdDoyenne IS NULL ) -- admin
