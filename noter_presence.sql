@@ -8,7 +8,7 @@ WHERE NOT EXISTS (
 
 INSERT INTO Venir (idPersonne, date, codeType_evenement)
 SELECT $id, DATE('now'), $codeevt
-WHERE $id IS NOT NULL AND $codeevt = 'RECOL' AND :dateevt is null
+WHERE $id IS NOT NULL AND :dateevt is null
 RETURNING 'redirect' AS component, 'detail.sql?id=' || $id AS link;
 
 INSERT INTO Venir (idPersonne, date, codeType_evenement)

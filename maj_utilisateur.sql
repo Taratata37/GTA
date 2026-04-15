@@ -58,7 +58,10 @@ select
     'form'            as component,
 	'Mettre à jour un utilisateur' AS title,
     'maj_utilisateur.sql?IdPersonne=' || $IdPersonne  as action;
-SELECT 'nom' as name, Personne.NomPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne;
+SELECT 'nom' as name, Personne.NomPersonne as value, FALSE as required 
+,CASE WHEN SexePersonne = "F" THEN 'Nom d''épouse'
+else 'Nom'  
+    END as label FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT 'nomjf' as name, 'Nom de jeune fille' as label,Personne.NomJfPersonne as value, FALSE as required FROM Personne WHERE IdPersonne = $IdPersonne AND Personne.SexePersonne = 'F';
 SELECT 'prenom' as name,'Prénom' as label,Personne.PrenomPersonne as value, TRUE as required FROM Personne WHERE IdPersonne = $IdPersonne;
 SELECT

@@ -36,67 +36,70 @@ WHERE $majok is not null;
 
 
 
-
-select 
+SELECT 
     'steps' as component,
-	TRUE as counter 
-	WHERE EXISTS (
-    SELECT 1 
-    FROM demander dem
-    INNER JOIN Sacrement sac ON dem.IdSacrement = sac.IdSacrement
-    WHERE dem.IdPersonne = $id AND sac.NomSacrement = 'Baptême'
-) ;
-SELECT title, active, link FROM (
-	SELECT * FROM(
-    SELECT 'Accueil' as title,
-           CASE WHEN accueil.IdPersonne IS NULL THEN TRUE ELSE FALSE END as active,
-           CASE WHEN accueil.IdPersonne IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=ACCUE' ELSE NULL END as link,
-           1 as ordre
-    FROM Personne per
-    LEFT JOIN Venir accueil ON (per.IdPersonne = accueil.IdPersonne AND accueil.codeType_evenement = 'ACCUE')
-    WHERE per.IdPersonne = $id
-    
-    UNION ALL
-    
-    SELECT 'Entrée en Eglise' as title,
-           CASE WHEN accueil.IdPersonne IS NOT NULL AND entree.IdPersonne IS NULL THEN TRUE ELSE FALSE END as active,
-           CASE WHEN accueil.IdPersonne IS NOT NULL AND entree.IdPersonne IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=ENTRE' ELSE NULL END as link,
-           2 as ordre
-    FROM Personne per
-    LEFT JOIN Venir accueil ON (per.IdPersonne = accueil.IdPersonne AND accueil.codeType_evenement = 'ACCUE')
-    LEFT JOIN Venir entree ON (per.IdPersonne = entree.IdPersonne AND entree.codeType_evenement = 'ENTRE')
-    WHERE per.IdPersonne = $id
-    
-    UNION ALL
-    
-    SELECT 'Appel décisif' as title,
-           CASE WHEN entree.IdPersonne IS NOT NULL AND appel.IdPersonne IS NULL THEN TRUE ELSE FALSE END as active,
-           CASE WHEN entree.IdPersonne IS NOT NULL AND appel.IdPersonne IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=APDEC' ELSE NULL END as link,
-           3 as ordre
-    FROM Personne per
-    LEFT JOIN Venir entree ON (per.IdPersonne = entree.IdPersonne AND entree.codeType_evenement = 'ENTRE')
-    LEFT JOIN Venir appel ON (per.IdPersonne = appel.IdPersonne AND appel.codeType_evenement = 'APDEC')
-    WHERE per.IdPersonne = $id
-    
-    UNION ALL
-    
-    SELECT 'Réception des sacrements' as title,
-           CASE WHEN appel.IdPersonne IS NOT NULL AND sacrement.IdPersonne IS NULL THEN TRUE ELSE FALSE END as active,
-           CASE WHEN appel.IdPersonne IS NOT NULL AND sacrement.IdPersonne IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=SCRMT' ELSE NULL END as link,
-           4 as ordre
-    FROM Personne per
-    LEFT JOIN Venir appel ON (per.IdPersonne = appel.IdPersonne AND appel.codeType_evenement = 'APDEC')
-    LEFT JOIN Venir sacrement ON (per.IdPersonne = sacrement.IdPersonne AND sacrement.codeType_evenement = 'SCRMT')
-    WHERE per.IdPersonne = $id
-)ORDER BY ordre
-) AS etapes
-
+    TRUE as counter 
 WHERE EXISTS (
     SELECT 1 
     FROM demander dem
     INNER JOIN Sacrement sac ON dem.IdSacrement = sac.IdSacrement
     WHERE dem.IdPersonne = $id AND sac.NomSacrement = 'Baptême'
-) ;
+);
+WITH presence AS (
+    SELECT
+        MAX(CASE WHEN codeType_evenement = 'ACCUE' THEN IdPersonne END) AS accueil,
+        MAX(CASE WHEN codeType_evenement = 'ENTRE' THEN IdPersonne END) AS entree,
+        MAX(CASE WHEN codeType_evenement = 'APDEC' THEN IdPersonne END) AS appel,
+        MAX(CASE WHEN codeType_evenement = 'SCRMT' THEN IdPersonne END) AS sacrement
+    FROM Venir
+    WHERE IdPersonne = $id
+)
+SELECT title, active, link
+FROM (
+    SELECT
+        'Accueil'                                                                   AS title,
+        CASE WHEN entree   IS NULL THEN TRUE ELSE FALSE END                         AS active,
+        CASE WHEN accueil  IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=ACCUE' END AS link,
+        1 AS ordre
+    FROM presence
+
+    UNION ALL
+
+    SELECT
+        'Entrée en Eglise'                                                          AS title,
+        CASE WHEN entree IS NOT NULL AND appel    IS NULL THEN TRUE ELSE FALSE END  AS active,
+        CASE WHEN accueil IS NOT NULL AND entree  IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=ENTRE' END AS link,
+        2 AS ordre
+    FROM presence
+
+    UNION ALL
+
+    SELECT
+        'Appel décisif'                                                             AS title,
+        CASE WHEN appel IS NOT NULL AND sacrement IS NULL THEN TRUE ELSE FALSE END  AS active,
+        CASE WHEN entree IS NOT NULL AND appel    IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=APDEC' END AS link,
+        3 AS ordre
+    FROM presence
+
+    UNION ALL
+
+    SELECT
+        'Réception des sacrements'                                                  AS title,
+        CASE WHEN sacrement IS NOT NULL THEN TRUE ELSE FALSE END                    AS active,
+        CASE WHEN appel IS NOT NULL AND sacrement IS NULL THEN '/noter_presence.sql?id=' || $id || '&codeevt=SCRMT' END AS link,
+        4 AS ordre
+    FROM presence
+
+    ORDER BY ordre
+) AS etapes
+WHERE EXISTS (
+    SELECT 1
+    FROM demander dem
+    INNER JOIN Sacrement sac ON dem.IdSacrement = sac.IdSacrement
+    WHERE dem.IdPersonne = $id AND sac.NomSacrement = 'Baptême'
+);
+
+
 
 select 
     'modal'                as component,
@@ -117,14 +120,14 @@ select
     'datagrid' as component;
 select 
     'Nom' as title,
-    NomPersonne      as description
+    COALESCE(NULLIF(NomPersonne,''),NomJfPersonne)      as description
 	FROM Personne
 WHERE IdPersonne = $id;
 select 
     'Nom de jeune fille' as title,
     NomJfPersonne  as description
 	FROM Personne
-	WHERE SexePersonne = "F" ANd IdPersonne = $id;
+	WHERE SexePersonne = "F" ANd IdPersonne = $id AND NULLIF(NomPersonne,'') NOT NULL;
 select 
 	'Prénom' as title,
 	PrenomPersonne  as description
