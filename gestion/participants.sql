@@ -30,39 +30,26 @@ Select
 	TRUE as bom;
 	
 select DISTINCT
-    Personne.NomPersonne as Nom
-    ,Personne.NomJfPersonne  as "Nom de jeune fille"
+	Personne.IdPersonne
+	,doy.NomDoyenne
+	,equ.libelleEquipe
+    ,COALESCE(NULLIF(Personne.NomJfPersonne,''),Personne.NomPersonne) as Nom
 	,Personne.PrenomPersonne as Prénom
+	,COALESCE(NULLIF(Personne.NomPersonne,''),Personne.NomJfPersonne)  as "Nom d'usage"
 	,Personne.CourrielPersonne as Courriel
-	,Remplir.CommentaireFormalite as parrain
-    ,remplir2.CommentaireFormalite as "certificat de baptème"
-	 , (
-        SELECT libelle
-        FROM (
-            SELECT ven.codeType_evenement
-            ,CASE ven.codeType_evenement
-                    WHEN 'ACCUE' THEN 'Accueilli'
-                    WHEN 'ENTRE' THEN 'Catéchumène'
-                    WHEN 'APDEC' THEN 'Catéchumène'
-                    WHEN 'SCRMT' THEN 'Néophyte'
-                    ELSE ''
-            END libelle 
-            ,CASE ven.codeType_evenement
-                    WHEN 'ACCUE' THEN 1
-                    WHEN 'ENTRE' THEN 2
-                    WHEN 'APDEC' THEN 3
-                    WHEN 'SCRMT' THEN 4
-                    ELSE 0
-            END ordre 
-            FROM Venir ven
-            WHERE ven.IdPersonne = Personne.IdPersonne
-           ORDER BY ordre desc
-        )
-        LIMIT 1
-    ) AS 'Étape de cheminement'
-    ,equ.LibelleEquipe as équipe
-    ,sper.titre as 'état'
-    ,sqlpage.protocol() || '://' || sqlpage.header('host') || '/public/detail.sql?id=' || Personne.IdPersonne || '&pin='|| Personne.pinPersonne as "espace_en_ligne"
+	,Personne.TelephonePersonne as téléphone
+	 -- Ajout des colonnes pour chaque sacrement
+    ,EXISTS(SELECT 1 FROM Demander d WHERE d.IdPersonne = Personne.IdPersonne AND d.IdSacrement = (SELECT idSacrement FROM Sacrement WHERE NomSacrement = 'baptême')) AS demande_le_baptême
+    ,EXISTS(SELECT 1 FROM Demander d WHERE d.IdPersonne = Personne.IdPersonne AND d.IdSacrement = (SELECT idSacrement FROM Sacrement WHERE NomSacrement = 'confirmation')) AS demande_la_confirmation
+    ,EXISTS(SELECT 1 FROM Demander d WHERE d.IdPersonne = Personne.IdPersonne AND d.IdSacrement = (SELECT idSacrement FROM Sacrement WHERE NomSacrement = 'eucharistie')) AS demande_l_eucharistie
+    ,EXISTS(SELECT 1 FROM Demander d WHERE d.IdPersonne = Personne.IdPersonne AND d.IdSacrement = (SELECT idSacrement FROM Sacrement WHERE NomSacrement LIKE 'Reprise%')) AS demande_reprise_vie
+    ,EXISTS(SELECT 1 FROM Demander d WHERE d.IdPersonne = Personne.IdPersonne AND d.IdSacrement = (SELECT idSacrement FROM Sacrement WHERE NomSacrement LIKE 'Réintroduction%')) AS demande_geste_évêque
+
+	,COALESCE(NULLIF(Remplir.CommentaireFormalite,''),remplir.Idformalite > 0,0) as parrain
+    ,COALESCE(NULLIF(Remplir2.CommentaireFormalite,''),remplir2.Idformalite > 0,0) as "certificat de baptème"
+	,COALESCE(NULLIF(Remplir3.CommentaireFormalite,''),remplir3.Idformalite > 0,0) as "acte de naissance"
+	,COALESCE(NULLIF(Remplir4.CommentaireFormalite,''),remplir4.Idformalite > 0,0) as "lettre à l'évêque"
+    ,sper.titre as 'état'    
     
 FROM Personne Personne
 NATURAL JOIN Status_Personne sper
@@ -71,6 +58,13 @@ LEFT JOIN Formalite forma2 ON forma2.IdSection = sqlpage.cookie('IdSection') AND
 LEFT JOIN Remplir ON Personne.IdPersonne = Remplir.IdPersonne AND Remplir.IdFormalite = Formalite.IdFormalite
 LEFT JOIN Remplir remplir2 ON Personne.IdPersonne = remplir2.IdPersonne AND remplir2.IdFormalite = forma2.IdFormalite 
 LEFT JOIN Equipe equ ON equ.IdEquipe = Personne.IdEquipe
+
+LEFT JOIN Doyenne doy ON doy.IdDoyenne = equ.IdDoyenne
+LEFT JOIN Formalite forma3 ON forma3.IdSection = 1 AND  forma3.NomFormalite LIKE '%naissance%'
+LEFT JOIN Remplir remplir3 ON Personne.IdPersonne = remplir3.IdPersonne AND remplir3.IdFormalite = forma3.IdFormalite 
+LEFT JOIN Formalite forma4 ON forma4.IdSection = 1 AND  forma4.NomFormalite LIKE '%évêque%'
+LEFT JOIN Remplir remplir4 ON Personne.IdPersonne = remplir4.IdPersonne AND remplir4.IdFormalite = forma4.IdFormalite 
+
 WHERE Personne.IdSection = sqlpage.cookie('IdSection')
 AND cast(Personne.IdPromotion as text) = sqlpage.cookie('IdPromotion')
 AND (
