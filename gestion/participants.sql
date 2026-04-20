@@ -46,7 +46,7 @@ select DISTINCT
     ,EXISTS(SELECT 1 FROM Demander d WHERE d.IdPersonne = Personne.IdPersonne AND d.IdSacrement = (SELECT idSacrement FROM Sacrement WHERE NomSacrement LIKE 'Réintroduction%')) AS demande_geste_évêque
 
 	,COALESCE(NULLIF(Remplir.CommentaireFormalite,''),remplir.Idformalite > 0,0) as parrain
-    ,COALESCE(NULLIF(Remplir2.CommentaireFormalite,''),remplir2.Idformalite > 0,0) as "certificat de baptème"
+    ,COALESCE(NULLIF(Remplir2.CommentaireFormalite,''),remplir2.Idformalite > 0,0) as "certificat de baptême"
 	,COALESCE(NULLIF(Remplir3.CommentaireFormalite,''),remplir3.Idformalite > 0,0) as "acte de naissance"
 	,COALESCE(NULLIF(Remplir4.CommentaireFormalite,''),remplir4.Idformalite > 0,0) as "lettre à l'évêque"
     ,sper.titre as 'état'    
