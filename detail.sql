@@ -136,11 +136,19 @@ select
 	'Courriel' as title,
 	CourrielPersonne  as description
 	FROM Personne WHERE IdPersonne = $id;
-select 
-    'Téléphone' as title,
-    TelephonePersonne  as description
-	FROM Personne
-	WHERE IdPersonne = $id;
+WITH tel AS (
+    SELECT REPLACE(REPLACE(TelephonePersonne, ' ', ''), '-', '') AS n
+    FROM Personne
+    WHERE IdPersonne = $id
+)
+SELECT
+    'Téléphone' AS title,
+    SUBSTR(n, 1, 2) || ' ' ||
+    SUBSTR(n, 3, 2) || ' ' ||
+    SUBSTR(n, 5, 2) || ' ' ||
+    SUBSTR(n, 7, 2) || ' ' ||
+    SUBSTR(n, 9, 2) AS description
+FROM tel;
 SELECT 'Date d''inscription' as title,
 	STRFTIME('%d/%m/%Y',DateInscriptionPersonne) as description
 	FROM Personne
