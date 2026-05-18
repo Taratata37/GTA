@@ -200,6 +200,14 @@ SELECT 'html' AS component, '
       border-right: 5px solid transparent;
       border-bottom: 9px solid #d9534f;
     }
+    .dot.na {
+      width: 9px; height: 9px;
+      border-radius: 1px;          /* rectangle, coins légèrement arrondis */
+      background: #e07b00;         /* orange */
+      flex-shrink: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
     .formalite-item .comment { font-size: 7.5pt; color: var(--muted); margin-left: auto; }
 
     /* ── Étapes catéchuménat ── */
@@ -517,7 +525,11 @@ SELECT 'html' AS component,
   <div class="formalites">' ||
   GROUP_CONCAT(
     '<div class="formalite-item">'
-    || '<span class="dot ' || CASE WHEN Remplir.IdPersonne IS NULL THEN 'nok' ELSE 'ok' END || '"></span>'
+    || '<span class="dot ' || CASE
+     WHEN Remplir.IdPersonne IS NULL THEN 'nok'
+     WHEN UPPER(TRIM(COALESCE(Remplir.CommentaireFormalite, ''))) IN ('N/C', 'N/A') THEN 'na'
+     ELSE 'ok'
+   END || '"></span>'
     || Formalite.NomFormalite
     || CASE WHEN NULLIF(Remplir.CommentaireFormalite,'') IS NOT NULL
             THEN '<span class="comment">' || Remplir.CommentaireFormalite || '</span>'

@@ -281,15 +281,24 @@ LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.Id
 select 
     'list'             as component,
     '🗃️ Formalités' as title;
-select 
+SELECT 
     Formalite.NomFormalite             as title,
-    CASE WHEN NULLIF(Remplir.IdPersonne,'') IS NULL
-        THEN 'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1')
+    CASE
+        WHEN NULLIF(Remplir.IdPersonne,'') IS NULL
+            THEN 'remplir_formalite.sql?IdPersonne='|| $id || '&IdFormalite=' || Formalite.IdFormalite || '&ok=' || COALESCE(Remplir.IdPersonne,'-1')
         ELSE '#modale_formalite_' || Formalite.IdFormalite  
     END as link,
     Remplir.CommentaireFormalite || ' - Cliquez pour changer l''état' as description,
-    iif(Remplir.IdPersonne IS NULL, 'red','green')          as color,
-    iif(Remplir.IdPersonne IS NULL, 'arrow-big-right','check') as icon
+    CASE
+        WHEN Remplir.IdPersonne IS NULL                                              THEN 'red'
+        WHEN UPPER(TRIM(COALESCE(Remplir.CommentaireFormalite, ''))) IN ('N/C','N/A') THEN 'orange'
+        ELSE 'green'
+    END as color,
+    CASE
+        WHEN Remplir.IdPersonne IS NULL                                              THEN 'arrow-big-right'
+        WHEN UPPER(TRIM(COALESCE(Remplir.CommentaireFormalite, ''))) IN ('N/C','N/A') THEN 'player-pause'
+        ELSE 'check'
+    END as icon
 FROM Formalite
 INNER JOIN Personne ON (Personne.IdSection = Formalite.IdSection AND Personne.IdPersonne = $id)
 LEFT JOIN Remplir ON (Formalite.IdFormalite = Remplir.IdFormalite AND Remplir.IdPersonne = $id);
