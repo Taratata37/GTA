@@ -203,7 +203,18 @@ FROM
     Personne per
 WHERE
     $id IS NOT NULL
-    AND per.IdPersonne = $id;
+    AND per.IdPersonne = $id
+    
+    AND EXISTS (
+    SELECT 1
+    FROM v_sessions_valides scn
+    LEFT JOIN Personne per ON per.IdPersonne = $id
+    LEFT JOIN Equipe equ ON equ.IdEquipe = per.IdEquipe
+    WHERE jeton = sqlpage.cookie('jeton_session')
+    AND (
+        scn.IdDoyenne IS NULL                        -- admin : accès à tout
+    )
+);
 
 
 
@@ -211,7 +222,17 @@ SELECT
     '#form_modal_validerpresence' as link,
     'lime' as color,
 
-    'Valider la présence ...' as title;
+    'Valider la présence ...' as title
+    WHERE EXISTS (
+    SELECT 1
+    FROM v_sessions_valides scn
+    LEFT JOIN Personne per ON per.IdPersonne = $id
+    LEFT JOIN Equipe equ ON equ.IdEquipe = per.IdEquipe
+    WHERE jeton = sqlpage.cookie('jeton_session')
+    AND (
+        scn.IdDoyenne IS NULL                        -- admin : accès à tout
+    )
+);
 select 
     '#form_modal_details'     as link,
     'blue' as color,
@@ -337,10 +358,22 @@ select
 	TRUE    as small; 
 SELECT STRFTIME('%d/%m/%Y',DATE) as date
 , NomType_evenement as 'Evènement'
-,'[🗑️ supprimer](supprimer_presence.sql?IdPersonne=' || $id || '&date=' || date || '&codeevt=' || Venir.codeType_evenement || ')' as supprimer
+, (SELECT'[🗑️ supprimer](supprimer_presence.sql?IdPersonne=' || $id || '&date=' || date || '&codeevt=' || Venir.codeType_evenement || ')' WHERE
+     EXISTS (
+    SELECT 1
+    FROM v_sessions_valides scn
+    LEFT JOIN Personne per ON per.IdPersonne = $id
+    LEFT JOIN Equipe equ ON equ.IdEquipe = per.IdEquipe
+    WHERE jeton = sqlpage.cookie('jeton_session')
+    AND (
+        scn.IdDoyenne IS NULL                        -- admin : accès à tout
+    )
+))as supprimer
 FROM Venir
 LEFT JOIN type_evenement ON type_evenement.codeType_evenement = venir.codeType_evenement
 WHERE IdPersonne = $id;
+
+
 
 select 
     'modal'                as component,
