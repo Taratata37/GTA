@@ -76,3 +76,22 @@ SELECT * FROM (
     )
     WHERE scn.jeton = sqlpage.cookie('jeton_session')
 ) t;
+
+
+-- Champ facultatif : sacrement(s) demandé(s), appliqué(s) à toutes les personnes du fichier
+-- Accompagnement(s) demandé(s), facultatif
+SELECT
+    'IdSacrement[]'          AS name,
+    'Accompagnement demandé' AS label,
+    'select'                 AS type,
+    TRUE                     AS searchable,
+    TRUE                     AS multiple,
+    FALSE                    AS required,
+    'Facultatif : appliqué à toutes les personnes du fichier (ctrl pour en sélectionner plusieurs)' AS description,
+    json_group_array(
+        json_object(
+            'label', sac.NomSacrement,
+            'value', sac.IdSacrement
+        )
+    ) AS options
+FROM Sacrement sac;

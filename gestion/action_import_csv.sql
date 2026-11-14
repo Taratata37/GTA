@@ -17,6 +17,17 @@ with (header true, delimiter ',', quote '"', null ''); -- all the options are op
 -- if you don't have a header line, the first column in the CSV will be interpreted as the first column of the table, etc
 
 -- run any preprocessing you want on the data here
+-- Normalise la valeur reçue en tableau JSON (0, 1 ou plusieurs sacrements)
+-- Tableau JSON des sacrements cochés ('[]' si rien n'est sélectionné)
+SET sacrements = COALESCE(
+    CASE WHEN json_valid(:IdSacrement) THEN :IdSacrement END,
+    '[]'
+);
+
+
+BEGIN;
+-- Dernier id existant avant l'import
+SET maxid = (SELECT COALESCE(MAX(IdPersonne), 0) FROM Personne);
 
 -- insert the data into the users table
 INSERT INTO Personne (
@@ -74,5 +85,16 @@ WHERE nom IS NOT NULL
     AND LENGTH(COALESCE(nom,'')) > 0
     AND (sexe = 'F' OR LENGTH(COALESCE(nomepouse, '')) = 0 ) ;
 
+-- Affecte les sacrements demandés à toutes les personnes importées
+INSERT OR IGNORE INTO Demander (IdPersonne, IdSacrement)
+SELECT p.IdPersonne, CAST(j.value AS INTEGER)
+FROM Personne p
+CROSS JOIN json_each($sacrements) j
+WHERE p.IdPersonne > CAST($maxid AS INTEGER)
+  AND j.value IS NOT NULL
+  AND j.value <> '';
 
-SELECT 'redirect' AS component, '../' AS link
+COMMIT;
+
+SELECT 'redirect' AS component, '../' AS link;
+

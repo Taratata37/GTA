@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+actor "Recommençant" as R
+actor "Animateur\ndu groupe" as A
+actor "Responsable\nde doyenné" as RD
+actor "Équipe\ndu diocèse" as ED
+ usecase "Soumettre son dossier" as UC1
+ usecase "Transmettre le dossier" as UC2
+rectangle "GTA" {
+  usecase "Saisir le dossier\ndans le système" as UC4
+  usecase "Valider les dossiers" as UC5
+  usecase "Contrôler les dossiers" as UC6
+}
+
+R -> UC1
+UC1 -> A
+A -> UC2
+UC2 ->RD
+RD --> UC4 : accès doyenné
+ED --> UC5 : accès diocésain
+ED --> UC6 : accès diocésain
+
+
+note right of RD
+  Accès restreint
+  au niveau doyenné
+end note
+
+note right of ED
+  Accès complet
+  au niveau diocésain
+end note
+@enduml
